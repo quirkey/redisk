@@ -1,13 +1,17 @@
 module Redisk
   class IO
+    include Enumerable
+    
     class NotImplementedError < RuntimeError; end
-    class EOFError < ::IO::EOFError; end
+    class EOFError < ::EOFError; end
     
     attr_reader :name, :mode, :_
   
     def initialize(name, mode = 'rw')
-      @name = name
-      @mode = mode # we're going to just ignore this for now
+      @name   = name
+      @mode   = mode # we're going to just ignore this for now
+      @buffer = nil
+      @sync   = false
       @lineno = 0
     end
     alias :for_fd :initialize
@@ -94,7 +98,7 @@ module Redisk
     #    IO.read("testfile", 20, 10)   #=> "ne one\nThis is line "
     def self.read(name, length = nil, offset = nil)
       start_i = offset || 0
-      end_i   = length ? start_i + length : -1
+      end_i   = length ? start_i + (length - 1) : -1
       values  = redis.lrange(list_key(name), start_i, end_i)
       values.join("\n")
     end
@@ -134,8 +138,10 @@ module Redisk
     # 
     #    Hello world!
     def <<(text)
-      write text
-      self
+      @buffer ||= ''
+      @buffer << text
+      flush if sync
+      @buffer
     end
     
     # ios.binmode => ios
@@ -301,7 +307,8 @@ module Redisk
     # 
     #    no newline
     def flush
-      
+      redis.rpush list_key, @buffer if @buffer
+      @buffer = nil
     end
     
     # ios.fsync => 0 or nil
@@ -335,6 +342,7 @@ module Redisk
     #    File.new("testfile").gets   #=> "This is line one\n"
     #    $_                          #=> "This is line one\n"
     def gets
+      flush
       val = redis.lrange(list_key, lineno, lineno + 1)
       if val = val.first
         self.lineno += 1
@@ -345,8 +353,9 @@ module Redisk
     
     # Return a string describing this IO object.
     def inspect
-      "<Redisk::IO #{name}>"
+      "<Redisk::IO (#{name})>"
     end
+    alias :to_s :inspect
     
     # 
     # ios.ioctl(integer_cmd, arg) => integer
@@ -692,9 +701,9 @@ module Redisk
       
     end
     
-    SEEK_SET = ::IO::SEEK_SET
-    SEEK_END = ::IO::SEEK_END
-    SEEK_CUR = ::IO::SEEK_CUR
+    SEEK_SET = 0
+    SEEK_CUR = 1
+    SEEK_END = 2
     
     # ios.seek(amount, whence=SEEK_SET) → 0
     # Seeks to a given offset anInteger in the stream according to the value 
@@ -755,7 +764,7 @@ module Redisk
     #    f.sync = true
     # (produces no output)
     def sync=(setting)
-      @sync 
+      @sync = !!setting
     end
     
     # ios.sysread(integer ) => string
@@ -820,7 +829,8 @@ module Redisk
     #    That was 15 bytes of data
     def write(string)
       string = string.to_s
-      redis.rpush list_key, string
+      @buffer = string
+      flush
       string.length
     end
     

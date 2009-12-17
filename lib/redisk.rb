@@ -1,3 +1,4 @@
+require 'logger'
 require 'redis/namespace'
 require 'redisk/io'
 

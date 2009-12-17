@@ -76,7 +76,7 @@ describe Redisk::IO do
     end
 
     it 'should return [length] contents starting at [offset]' do
-      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..4].join("\n")
+      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..3].join("\n")
     end
 
   end
@@ -313,5 +313,23 @@ describe Redisk::IO do
       end
 
     end
+  end
+  
+  describe 'As an interface for logger' do
+    before do
+      @io = Redisk::IO.new('test.log')
+      @logger = Logger.new(@io)
+    end
+    
+    after do
+      Redisk.redis.del Redisk::IO.list_key('test.log')
+    end
+    
+    it 'should write to the log' do
+      @logger.info "This should be info"
+      @logger.warn "This should be warn"
+      @io.size.should == 2
+    end    
+    
   end
 end
