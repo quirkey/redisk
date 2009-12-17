@@ -4,11 +4,11 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "redis-log"
+    gem.name = "redis_log"
     gem.summary = %Q{TODO: one-line summary of your gem}
     gem.description = %Q{TODO: longer description of your gem}
     gem.email = "aaron@quirkey.com"
-    gem.homepage = "http://github.com/quirkey/redis-log"
+    gem.homepage = "http://github.com/quirkey/redis_log"
     gem.authors = ["Aaron Quint"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
