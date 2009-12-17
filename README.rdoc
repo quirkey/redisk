@@ -40,6 +40,20 @@ Theres also a nifty wrapper for that behavior:
 By default, Redisk uses the Redis on localhost:6379, but you can change that by setting
 
     Redisk.redis = 'myhost:myport'
+
+== INSTALL (NOW!)
+    
+Gems are on gemcutter:
+
+    gem install redisk
+    
+Dependencies:
+
+    redis running somewhere
+    
+    gems:
+      redis
+      redis-namespace
     
 == Note on Patches/Pull Requests
  
