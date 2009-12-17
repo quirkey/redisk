@@ -1,12 +1,108 @@
 class Redisk::IO
+  class NotImplementedError < RuntimeError; end
+  
   attr_reader :name, :mode
   
   def initialize(name, mode = 'rw')
     @name = name
     @mode = mode # we're going to just ignore this for now
   end
+  alias :for_fd :initialize
+
+  def self.redis
+    Redisk.redis
+  end
   
+  def redis
+    self.class.redis
+  end
+
+  def self.list_key(name)
+    "#{name}:_list"
+  end
   
+  def list_key
+    self.class.list_key(name)
+  end
+  
+  # Executes the block for every line in the named I/O port, where lines are separated by sep_string.
+  # 
+  #    IO.foreach("testfile") {|x| print "GOT ", x }
+  # produces:
+  # 
+  #    GOT This is line one
+  #    GOT This is line two
+  #    GOT This is line three
+  #    GOT And so on...
+  def self.foreach(name, &block)
+    all.each(&block)
+  end
+  
+  # With no associated block, open is a synonym for IO::new. If the optional code block is given, it will be passed io as an argument, and the IO object will automatically be closed when the block terminates. In this instance, IO::open returns the value of the block.
+  def self.open(name, mode = 'r')
+    
+  end
+  
+  # IO.pipe → array
+  # Creates a pair of pipe endpoints (connected to each other) and returns them as a two-element array of IO objects: [ read_file, write_file ]. Not available on all platforms.
+  # 
+  # In the example below, the two processes close the ends of the pipe that they are not using. This is not just a cosmetic nicety. The read end of a pipe will not generate an end of file condition if there are any writers with the pipe still open. In the case of the parent process, the rd.read will never return if it does not first issue a wr.close.
+  # 
+  #    rd, wr = IO.pipe
+  # 
+  #    if fork
+  #      wr.close
+  #      puts "Parent got: <#{rd.read}>"
+  #      rd.close
+  #      Process.wait
+  #    else
+  #      rd.close
+  #      puts "Sending message to parent"
+  #      wr.write "Hi Dad"
+  #      wr.close
+  #    end
+  # produces:
+  # 
+  #    Sending message to parent
+  #    Parent got: <Hi Dad>
+  def self.pipe
+    
+  end
+  
+  # Opens the file, optionally seeks to the given offset, then returns length bytes (defaulting to the rest of the file). read ensures the file is closed before returning.
+  # 
+  #    IO.read("testfile")           #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
+  #    IO.read("testfile", 20)       #=> "This is line one\nThi"
+  #    IO.read("testfile", 20, 10)   #=> "ne one\nThis is line "
+  def self.read(name, length = nil, offset = nil)
+    
+  end
+  
+  # Reads the entire file specified by name as individual lines, and returns those lines in an array. Lines are separated by sep_string.
+  # 
+  #    a = IO.readlines("testfile")
+  #    a[0]   #=> "This is line one\n"
+  def self.readlines(name)
+    redis.lrange list_key(name)
+  end
+  alias all readlines
+  
+  # IO.select(read_array 
+  # [, write_array 
+  # [, error_array 
+  # [, timeout]]] ) => array or nil
+  # See Kernel#select.
+  def self.select(name)
+    raise NotImplementedError, ".select is not implemented"
+  end
+  
+  # IO.sysopen(path, [mode, [perm]]) => fixnum
+  # Opens the given path, returning the underlying file descriptor as a Fixnum.
+  # 
+  #    IO.sysopen("testfile")   #=> 3
+  def self.sysopen(name)
+    raise NotImplementedError, ".sysopen is not implemented"
+  end
   
   # ios << obj => ios
   #   String Output—Writes obj to ios. obj will be converted to a string using to_s.
