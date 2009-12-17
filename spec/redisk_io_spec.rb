@@ -4,13 +4,17 @@ describe Redisk::IO do
   before do
     # load a file into an IO object
     @io_name = 'rails.log'
-    key = Redisk::IO.list_key(@io_name)
+    @key = Redisk::IO.list_key(@io_name)
     @file_as_array = []
     File.foreach(File.dirname(__FILE__) + '/fixtures/rails.log') {|f|
       @file_as_array << f
-      Redisk.redis.lpush key, f
+      Redisk.redis.rpush @key, f
     }
     @io = Redisk::IO.new(@io_name)
+  end
+  
+  after do
+    Redisk.redis.del @key
   end
   
   describe 'new' do    
@@ -36,7 +40,7 @@ describe Redisk::IO do
     end
     
     it 'should return nil' do
-      assert_nil Redisk::IO.foreach(@io_name) {|l| l }
+      Redisk::IO.foreach(@io_name) {|l| l }.should == nil
     end
         
   end
@@ -64,15 +68,15 @@ describe Redisk::IO do
   describe 'read' do
     
     it 'should return the entire contents without arguments' do
-      Redisk::IO.read(@io_name).should == @file_as_array.join('\n')
+      Redisk::IO.read(@io_name).should == @file_as_array.join("\n")
     end
     
     it 'should return the first [length] contents' do
-      Redisk::IO.read(@io_name, 2).should == @file_as_array[0..1].join('\n')
+      Redisk::IO.read(@io_name, 2).should == @file_as_array[0..1].join("\n")
     end
     
     it 'should return [length] contents starting at [offset]' do
-      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..4].join('\n')
+      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..4].join("\n")
     end
     
   end

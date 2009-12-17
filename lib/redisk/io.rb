@@ -36,12 +36,14 @@ module Redisk
     #    GOT This is line three
     #    GOT And so on...
     def self.foreach(name, &block)
-      all.each(&block)
+      readlines(name).each(&block)
+      nil
     end
   
     # With no associated block, open is a synonym for IO::new. If the optional code block is given, it will be passed io as an argument, and the IO object will automatically be closed when the block terminates. In this instance, IO::open returns the value of the block.
     def self.open(name, mode = 'r')
-    
+      io = new(name, mode)
+      block_given? ? yield(io) : io
     end
   
     # IO.pipe → array
@@ -67,7 +69,7 @@ module Redisk
     #    Sending message to parent
     #    Parent got: <Hi Dad>
     def self.pipe
-    
+      raise NotImplementedError, ".pipe is not implemented"
     end
   
     # Opens the file, optionally seeks to the given offset, then returns length bytes (defaulting to the rest of the file). read ensures the file is closed before returning.
@@ -76,7 +78,10 @@ module Redisk
     #    IO.read("testfile", 20)       #=> "This is line one\nThi"
     #    IO.read("testfile", 20, 10)   #=> "ne one\nThis is line "
     def self.read(name, length = nil, offset = nil)
-    
+      start_i = offset || 0
+      end_i   = length ? start_i + length : -1
+      values  = redis.lrange(list_key(name), start_i, end_i)
+      values.join("\n")
     end
   
     # Reads the entire file specified by name as individual lines, and returns those lines in an array. Lines are separated by sep_string.
@@ -84,9 +89,8 @@ module Redisk
     #    a = IO.readlines("testfile")
     #    a[0]   #=> "This is line one\n"
     def self.readlines(name)
-      redis.lrange list_key(name)
+      redis.lrange list_key(name), 0, -1
     end
-    alias all readlines
   
     # IO.select(read_array 
     # [, write_array 
