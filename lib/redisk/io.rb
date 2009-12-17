@@ -27,7 +27,8 @@ module Redisk
       self.class.list_key(name)
     end
   
-    # Executes the block for every line in the named I/O port, where lines are separated by sep_string.
+    # Executes the block for every line in the named I/O port, where lines are 
+    # separated by sep_string.
     # 
     #    IO.foreach("testfile") {|x| print "GOT ", x }
     # produces:
@@ -41,16 +42,25 @@ module Redisk
       nil
     end
   
-    # With no associated block, open is a synonym for IO::new. If the optional code block is given, it will be passed io as an argument, and the IO object will automatically be closed when the block terminates. In this instance, IO::open returns the value of the block.
+    # With no associated block, open is a synonym for IO::new. If the optional 
+    # code block is given, it will be passed io as an argument, and the IO 
+    # object will automatically be closed when the block terminates. In this 
+    # instance, IO::open returns the value of the block.
     def self.open(name, mode = 'r')
       io = new(name, mode)
       block_given? ? yield(io) : io
     end
   
     # IO.pipe → array
-    # Creates a pair of pipe endpoints (connected to each other) and returns them as a two-element array of IO objects: [ read_file, write_file ]. Not available on all platforms.
+    # Creates a pair of pipe endpoints (connected to each other) and returns 
+    # them as a two-element array of IO objects: [ read_file, write_file ]. 
+    # Not available on all platforms.
     # 
-    # In the example below, the two processes close the ends of the pipe that they are not using. This is not just a cosmetic nicety. The read end of a pipe will not generate an end of file condition if there are any writers with the pipe still open. In the case of the parent process, the rd.read will never return if it does not first issue a wr.close.
+    # In the example below, the two processes close the ends of the pipe that 
+    # they are not using. This is not just a cosmetic nicety. The read end of 
+    # a pipe will not generate an end of file condition if there are any 
+    # writers with the pipe still open. In the case of the parent process, the 
+    # rd.read will never return if it does not first issue a wr.close.
     # 
     #    rd, wr = IO.pipe
     # 
@@ -73,9 +83,12 @@ module Redisk
       raise NotImplementedError, ".pipe is not implemented"
     end
   
-    # Opens the file, optionally seeks to the given offset, then returns length bytes (defaulting to the rest of the file). read ensures the file is closed before returning.
+    # Opens the file, optionally seeks to the given offset, then returns 
+    # length bytes (defaulting to the rest of the file). read ensures the file 
+    # is closed before returning.
     # 
-    #    IO.read("testfile")           #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
+    #    IO.read("testfile")           #=> "This is line one\nThis is line 
+    # two\nThis is line three\nAnd so on...\n"
     #    IO.read("testfile", 20)       #=> "This is line one\nThi"
     #    IO.read("testfile", 20, 10)   #=> "ne one\nThis is line "
     def self.read(name, length = nil, offset = nil)
@@ -85,7 +98,8 @@ module Redisk
       values.join("\n")
     end
   
-    # Reads the entire file specified by name as individual lines, and returns those lines in an array. Lines are separated by sep_string.
+    # Reads the entire file specified by name as individual lines, and returns 
+    # those lines in an array. Lines are separated by sep_string.
     # 
     #    a = IO.readlines("testfile")
     #    a[0]   #=> "This is line one\n"
@@ -103,14 +117,16 @@ module Redisk
     end
   
     # IO.sysopen(path, [mode, [perm]]) => fixnum
-    # Opens the given path, returning the underlying file descriptor as a Fixnum.
+    # Opens the given path, returning the underlying file descriptor as a 
+    # Fixnum.
     # 
     #    IO.sysopen("testfile")   #=> 3
     def self.sysopen(name)
       raise NotImplementedError, ".sysopen is not implemented"
     end
   
-    # String Output—Writes obj to ios. obj will be converted to a string using to_s.
+    # String Output—Writes obj to ios. obj will be converted to a string using 
+    # to_s.
     # 
     #    $stdout << "Hello " << "world!\n"
     # produces:
@@ -121,12 +137,17 @@ module Redisk
     end
     
     # ios.binmode => ios
-    # Puts ios into binary mode. This is useful only in MS-DOS/Windows environments. Once a stream is in binary mode, it cannot be reset to nonbinary mode.
+    # Puts ios into binary mode. This is useful only in MS-DOS/Windows 
+    # environments. Once a stream is in binary mode, it cannot be reset to 
+    # nonbinary mode.
     # 
     def binmode; end
     
     # ios.close => nil
-    # Closes ios and flushes any pending writes to the operating system. The stream is unavailable for any further data operations; an IOError is raised if such an attempt is made. I/O streams are automatically closed when they are claimed by the garbage collector.
+    # Closes ios and flushes any pending writes to the operating system. The 
+    # stream is unavailable for any further data operations; an IOError is 
+    # raised if such an attempt is made. I/O streams are automatically closed 
+    # when they are claimed by the garbage collector.
     # 
     # If ios is opened by IO.popen, close sets $?.
     def close
@@ -134,7 +155,9 @@ module Redisk
     end 
     
     # ios.close_read => nil
-    # Closes the read end of a duplex I/O stream (i.e., one that contains both a read and a write stream, such as a pipe). Will raise an IOError if the stream is not duplexed.
+    # Closes the read end of a duplex I/O stream (i.e., one that contains both 
+    # a read and a write stream, such as a pipe). Will raise an IOError if the 
+    # stream is not duplexed.
     # 
     #    f = IO.popen("/bin/sh","r+")
     #    f.close_read
@@ -148,7 +171,9 @@ module Redisk
     end
     
     # ios.close_write => nil
-    # Closes the write end of a duplex I/O stream (i.e., one that contains both a read and a write stream, such as a pipe). Will raise an IOError if the stream is not duplexed.
+    # Closes the write end of a duplex I/O stream (i.e., one that contains 
+    # both a read and a write stream, such as a pipe). Will raise an IOError 
+    # if the stream is not duplexed.
     # 
     #    f = IO.popen("/bin/sh","r+")
     #    f.close_write
@@ -163,7 +188,8 @@ module Redisk
     end
 
     # ios.closed? => true or false
-    # Returns true if ios is completely closed (for duplex streams, both reader and writer), false otherwise.
+    # Returns true if ios is completely closed (for duplex streams, both 
+    # reader and writer), false otherwise.
     # 
     #    f = File.new("testfile")
     #    f.close         #=> nil
@@ -179,7 +205,8 @@ module Redisk
     
     # ios.each(sep_string=$/) {|line| block } => ios
     # ios.each_line(sep_string=$/) {|line| block } => ios
-    # Executes the block for every line in ios, where lines are separated by sep_string. ios must be opened for reading or an IOError will be raised.
+    # Executes the block for every line in ios, where lines are separated by 
+    # sep_string. ios must be opened for reading or an IOError will be raised.
     # 
     #    f = File.new("testfile")
     #    f.each {|line| puts "#{f.lineno}: #{line}" }
@@ -195,7 +222,9 @@ module Redisk
     alias :each_line :each
     
     # ios.each_byte {|byte| block } => nil
-    # Calls the given block once for each byte (0..255) in ios, passing the byte as an argument. The stream must be opened for reading or an IOError will be raised.
+    # Calls the given block once for each byte (0..255) in ios, passing the 
+    # byte as an argument. The stream must be opened for reading or an IOError 
+    # will be raised.
     # 
     #    f = File.new("testfile")
     #    checksum = 0
@@ -207,12 +236,15 @@ module Redisk
     
     # ios.eof => true or false
     # ios.eof? => true or false
-    # Returns true if ios is at end of file that means there are no more data to read. The stream must be opened for reading or an IOError will be raised.
+    # Returns true if ios is at end of file that means there are no more data 
+    # to read. The stream must be opened for reading or an IOError will be 
+    # raised.
     # 
     #    f = File.new("testfile")
     #    dummy = f.readlines
     #    f.eof   #=> true
-    # If ios is a stream such as pipe or socket, IO#eof? blocks until the other end sends some data or closes it.
+    # If ios is a stream such as pipe or socket, IO#eof? blocks until the 
+    # other end sends some data or closes it.
     # 
     #    r, w = IO.pipe
     #    Thread.new { sleep 1; w.close }
@@ -224,14 +256,20 @@ module Redisk
     # 
     #    r, w = IO.pipe
     #    r.eof?  # blocks forever
-    # Note that IO#eof? reads data to a input buffer. So IO#sysread doesn‘t work with IO#eof?.
+    # Note that IO#eof? reads data to a input buffer. So IO#sysread doesn‘t 
+    # work with IO#eof?.
     def eof
       
     end
     alias :eof? :eof
     
     # ios.fcntl(integer_cmd, arg) => integer
-    # Provides a mechanism for issuing low-level commands to control or query file-oriented I/O streams. Arguments and results are platform dependent. If arg is a number, its value is passed directly. If it is a string, it is interpreted as a binary sequence of bytes (Array#pack might be a useful way to build this string). On Unix platforms, see fcntl(2) for details. Not implemented on all platforms.
+    # Provides a mechanism for issuing low-level commands to control or query 
+    # file-oriented I/O streams. Arguments and results are platform dependent. 
+    # If arg is a number, its value is passed directly. If it is a string, it 
+    # is interpreted as a binary sequence of bytes (Array#pack might be a 
+    # useful way to build this string). On Unix platforms, see fcntl(2) for 
+    # details. Not implemented on all platforms.
     def fcntl(integer_cmd, arg)
       
     end
@@ -247,7 +285,9 @@ module Redisk
     alias :to_i :fileno
     
     # ios.flush => ios
-    # Flushes any buffered data within ios to the underlying operating system (note that this is Ruby internal buffering only; the OS may buffer the data as well).
+    # Flushes any buffered data within ios to the underlying operating system 
+    # (note that this is Ruby internal buffering only; the OS may buffer the 
+    # data as well).
     # 
     #    $stdout.print "no newline"
     #    $stdout.flush
@@ -259,12 +299,17 @@ module Redisk
     end
     
     # ios.fsync => 0 or nil
-    # Immediately writes all buffered data in ios to disk. Returns nil if the underlying operating system does not support fsync(2). Note that fsync differs from using IO#sync=. The latter ensures that data is flushed from Ruby‘s buffers, but doesn‘t not guarantee that the underlying operating system actually writes it to disk.
+    # Immediately writes all buffered data in ios to disk. Returns nil if the 
+    # underlying operating system does not support fsync(2). Note that fsync 
+    # differs from using IO#sync=. The latter ensures that data is flushed 
+    # from Ruby‘s buffers, but doesn‘t not guarantee that the underlying 
+    # operating system actually writes it to disk.
     def fsync
     end
     
     # ios.getc => fixnum or nil
-    # Gets the next 8-bit byte (0..255) from ios. Returns nil if called at end of file.
+    # Gets the next 8-bit byte (0..255) from ios. Returns nil if called at end 
+    # of file.
     # 
     #    f = File.new("testfile")
     #    f.getc   #=> 84
@@ -273,7 +318,13 @@ module Redisk
     end
     
     # ios.gets(sep_string=$/) => string or nil
-    # Reads the next ``line’’ from the I/O stream; lines are separated by sep_string. A separator of nil reads the entire contents, and a zero-length separator reads the input a paragraph at a time (two successive newlines in the input separate paragraphs). The stream must be opened for reading or an IOError will be raised. The line read in will be returned and also assigned to $_. Returns nil if called at end of file.
+    # Reads the next ``line’’ from the I/O stream; lines are separated by 
+    # sep_string. A separator of nil reads the entire contents, and a 
+    # zero-length separator reads the input a paragraph at a time (two 
+    # successive newlines in the input separate paragraphs). The stream must 
+    # be opened for reading or an IOError will be raised. The line read in 
+    # will be returned and also assigned to $_. Returns nil if called at end 
+    # of file.
     # 
     #    File.new("testfile").gets   #=> "This is line one\n"
     #    $_                          #=> "This is line one\n"
@@ -288,20 +339,28 @@ module Redisk
     
     # 
     # ios.ioctl(integer_cmd, arg) => integer
-    # Provides a mechanism for issuing low-level commands to control or query I/O devices. Arguments and results are platform dependent. If arg is a number, its value is passed directly. If it is a string, it is interpreted as a binary sequence of bytes. On Unix platforms, see ioctl(2) for details. Not implemented on all platforms.
+    # Provides a mechanism for issuing low-level commands to control or query 
+    # I/O devices. Arguments and results are platform dependent. If arg is a 
+    # number, its value is passed directly. If it is a string, it is 
+    # interpreted as a binary sequence of bytes. On Unix platforms, see 
+    # ioctl(2) for details. Not implemented on all platforms.
     # 
     def ioctl(integer_cmd, arg)
     end
     
     # ios.isatty => true or false
     # ios.tty? => true or false
-    # Returns true if ios is associated with a terminal device (tty), false otherwise.
+    # Returns true if ios is associated with a terminal device (tty), false 
+    # otherwise.
     def isatty
       false
     end
     
     # ios.lineno => integer
-    # Returns the current line number in ios. The stream must be opened for reading. lineno counts the number of times gets is called, rather than the number of newlines encountered. The two values will differ if gets is called with a separator other than newline. See also the $. variable.
+    # Returns the current line number in ios. The stream must be opened for 
+    # reading. lineno counts the number of times gets is called, rather than 
+    # the number of newlines encountered. The two values will differ if gets 
+    # is called with a separator other than newline. See also the $. variable.
     # 
     #    f = File.new("testfile")
     #    f.lineno   #=> 0
@@ -314,7 +373,8 @@ module Redisk
     end
     
     # ios.lineno = integer => integer
-    # Manually sets the current line number to the given value. $. is updated only on the next read.
+    # Manually sets the current line number to the given value. $. is updated 
+    # only on the next read.
     # 
     #    f = File.new("testfile")
     #    f.gets                     #=> "This is line one\n"
@@ -329,7 +389,8 @@ module Redisk
     end
     
     # ios.pid => fixnum
-    # Returns the process ID of a child process associated with ios. This will be set by IO::popen.
+    # Returns the process ID of a child process associated with ios. This will 
+    # be set by IO::popen.
     # 
     #    pipe = IO.popen("-")
     #    if pipe
@@ -370,7 +431,11 @@ module Redisk
       
     # ios.print() => nil
     # ios.print(obj, ...) => nil
-    # Writes the given object(s) to ios. The stream must be opened for writing. If the output record separator ($\) is not nil, it will be appended to the output. If no arguments are given, prints $_. Objects that aren‘t strings will be converted by calling their to_s method. With no argument, prints the contents of the variable $_. Returns nil.
+    # Writes the given object(s) to ios. The stream must be opened for 
+    # writing. If the output record separator ($\) is not nil, it will be 
+    # appended to the output. If no arguments are given, prints $_. Objects 
+    # that aren‘t strings will be converted by calling their to_s method. With 
+    # no argument, prints the contents of the variable $_. Returns nil.
     # 
     #    $stdout.print("This is ", 100, " percent.\n")
     # produces:
@@ -381,13 +446,15 @@ module Redisk
     end
     
     # ios.printf(format_string [, obj, ...] ) => nil
-    # Formats and writes to ios, converting parameters under control of the format string. See Kernel#sprintf for details.
+    # Formats and writes to ios, converting parameters under control of the 
+    # format string. See Kernel#sprintf for details.
     def printf(format_string, *args)
       
     end
     
     # ios.putc(obj) => obj
-    # If obj is Numeric, write the character whose code is obj, otherwise write the first character of the string representation of obj to ios.
+    # If obj is Numeric, write the character whose code is obj, otherwise 
+    # write the first character of the string representation of obj to ios.
     # 
     #    $stdout.putc "A"
     #    $stdout.putc 65
@@ -399,7 +466,11 @@ module Redisk
     end
     
     # ios.puts(obj, ...) => nil
-    # Writes the given objects to ios as with IO#print. Writes a record separator (typically a newline) after any that do not already end with a newline sequence. If called with an array argument, writes each element on a new line. If called without arguments, outputs a single record separator.
+    # Writes the given objects to ios as with IO#print. Writes a record 
+    # separator (typically a newline) after any that do not already end with a 
+    # newline sequence. If called with an array argument, writes each element 
+    # on a new line. If called without arguments, outputs a single record 
+    # separator.
     # 
     #    $stdout.puts("this", "is", "a", "test")
     # produces:
@@ -413,9 +484,13 @@ module Redisk
     end
     
     # ios.read([length [, buffer]]) => string, buffer, or nil
-    # Reads at most length bytes from the I/O stream, or to the end of file if length is omitted or is nil. length must be a non-negative integer or nil. If the optional buffer argument is present, it must reference a String, which will receive the data.
+    # Reads at most length bytes from the I/O stream, or to the end of file if 
+    # length is omitted or is nil. length must be a non-negative integer or 
+    # nil. If the optional buffer argument is present, it must reference a 
+    # String, which will receive the data.
     # 
-    # At end of file, it returns nil or "" depend on length. ios.read() and ios.read(nil) returns "". ios.read(positive-integer) returns nil.
+    # At end of file, it returns nil or "" depend on length. ios.read() and 
+    # ios.read(nil) returns "". ios.read(positive-integer) returns nil.
     # 
     #    f = File.new("testfile")
     #    f.read(16)   #=> "This is line one"
@@ -425,15 +500,19 @@ module Redisk
     
     # ios.read_nonblock(maxlen) => string
     # ios.read_nonblock(maxlen, outbuf) => outbuf
-    # Reads at most maxlen bytes from ios using read(2) system call after O_NONBLOCK is set for the underlying file descriptor.
+    # Reads at most maxlen bytes from ios using read(2) system call after 
+    # O_NONBLOCK is set for the underlying file descriptor.
     # 
-    # If the optional outbuf argument is present, it must reference a String, which will receive the data.
+    # If the optional outbuf argument is present, it must reference a String, 
+    # which will receive the data.
     # 
-    # read_nonblock just calls read(2). It causes all errors read(2) causes: EAGAIN, EINTR, etc. The caller should care such errors.
+    # read_nonblock just calls read(2). It causes all errors read(2) causes: 
+    # EAGAIN, EINTR, etc. The caller should care such errors.
     # 
     # read_nonblock causes EOFError on EOF.
     # 
-    # If the read buffer is not empty, read_nonblock reads from the buffer like readpartial. In this case, read(2) is not called.
+    # If the read buffer is not empty, read_nonblock reads from the buffer 
+    # like readpartial. In this case, read(2) is not called.
     #
     def read_nonblock
       
@@ -445,14 +524,16 @@ module Redisk
     # 
     # If the data read is nil an EOFError is raised.
     # 
-    # If the data read is too short a TruncatedDataError is raised and the read data is obtainable via its data method.
+    # If the data read is too short a TruncatedDataError is raised and the 
+    # read data is obtainable via its data method.
     # 
     def readbytes(n)
       
     end
     
     # ios.readchar => fixnum
-    # Reads a character as with IO#getc, but raises an EOFError on end of file.
+    # Reads a character as with IO#getc, but raises an EOFError on end of 
+    # file.
     def readchar
       
     end
@@ -464,7 +545,10 @@ module Redisk
     end
     
     # ios.readlines(sep_string=$/) => array
-    # Reads all of the lines in ios, and returns them in anArray. Lines are separated by the optional sep_string. If sep_string is nil, the rest of the stream is returned as a single record. The stream must be opened for reading or an IOError will be raised.
+    # Reads all of the lines in ios, and returns them in anArray. Lines are 
+    # separated by the optional sep_string. If sep_string is nil, the rest of 
+    # the stream is returned as a single record. The stream must be opened for 
+    # reading or an IOError will be raised.
     # 
     #    f = File.new("testfile")
     #    f.readlines[0]   #=> "This is line one\n"
@@ -474,16 +558,27 @@ module Redisk
     
     # ios.readpartial(maxlen) => string
     # ios.readpartial(maxlen, outbuf) => outbuf
-    # Reads at most maxlen bytes from the I/O stream. It blocks only if ios has no data immediately available. It doesn‘t block if some data available. If the optional outbuf argument is present, it must reference a String, which will receive the data. It raises EOFError on end of file.
+    # Reads at most maxlen bytes from the I/O stream. It blocks only if ios 
+    # has no data immediately available. It doesn‘t block if some data 
+    # available. If the optional outbuf argument is present, it must reference 
+    # a String, which will receive the data. It raises EOFError on end of 
+    # file.
     # 
-    # readpartial is designed for streams such as pipe, socket, tty, etc. It blocks only when no data immediately available. This means that it blocks only when following all conditions hold.
+    # readpartial is designed for streams such as pipe, socket, tty, etc. It 
+    # blocks only when no data immediately available. This means that it 
+    # blocks only when following all conditions hold.
     # 
     # the buffer in the IO object is empty.
     # the content of the stream is empty.
     # the stream is not reached to EOF.
-    # When readpartial blocks, it waits data or EOF on the stream. If some data is reached, readpartial returns with the data. If EOF is reached, readpartial raises EOFError.
+    # When readpartial blocks, it waits data or EOF on the stream. If some 
+    # data is reached, readpartial returns with the data. If EOF is reached, 
+    # readpartial raises EOFError.
     # 
-    # When readpartial doesn‘t blocks, it returns or raises immediately. If the buffer is not empty, it returns the data in the buffer. Otherwise if the stream has some content, it returns the data in the stream. Otherwise if the stream is reached to EOF, it raises EOFError.
+    # When readpartial doesn‘t blocks, it returns or raises immediately. If 
+    # the buffer is not empty, it returns the data in the buffer. Otherwise if 
+    # the stream has some content, it returns the data in the stream. 
+    # Otherwise if the stream is reached to EOF, it raises EOFError.
     # 
     #    r, w = IO.pipe           #               buffer          pipe content
     #    w << "abc"               #               ""              "abc".
@@ -504,9 +599,13 @@ module Redisk
     #    r.readpartial(4096)      #=> "ghi\n"     ""              ""
     # Note that readpartial behaves similar to sysread. The differences are:
     # 
-    # If the buffer is not empty, read from the buffer instead of "sysread for buffered IO (IOError)".
-    # It doesn‘t cause Errno::EAGAIN and Errno::EINTR. When readpartial meets EAGAIN and EINTR by read system call, readpartial retry the system call.
-    # The later means that readpartial is nonblocking-flag insensitive. It blocks on the situation IO#sysread causes Errno::EAGAIN as if the fd is blocking mode.
+    # If the buffer is not empty, read from the buffer instead of "sysread for 
+    # buffered IO (IOError)".
+    # It doesn‘t cause Errno::EAGAIN and Errno::EINTR. When readpartial meets 
+    # EAGAIN and EINTR by read system call, readpartial retry the system call.
+    # The later means that readpartial is nonblocking-flag insensitive. It 
+    # blocks on the situation IO#sysread causes Errno::EAGAIN as if the fd is 
+    # blocking mode.
     # 
     def readpartial
       
@@ -514,7 +613,9 @@ module Redisk
     
     # ios.reopen(other_IO) => ios 
     # ios.reopen(path, mode_str) => ios
-    # Reassociates ios with the I/O stream given in other_IO or to a new stream opened on path. This may dynamically change the actual class of this stream.
+    # Reassociates ios with the I/O stream given in other_IO or to a new 
+    # stream opened on path. This may dynamically change the actual class of 
+    # this stream.
     # 
     #    f1 = File.new("testfile")
     #    f2 = File.new("testfile")
@@ -538,11 +639,15 @@ module Redisk
     end
     
     # scanf(str,&b)
-    # The trick here is doing a match where you grab one line of input at a time. The linebreak may or may not occur at the boundary where the string matches a format specifier. And if it does, some rule about whitespace may or may not be in effect…
+    # The trick here is doing a match where you grab one line of input at a 
+    # time. The linebreak may or may not occur at the boundary where the 
+    # string matches a format specifier. And if it does, some rule about 
+    # whitespace may or may not be in effect…
     # 
     # That‘s why this is much more elaborate than the string version.
     # 
-    # For each line: Match succeeds (non-emptily) and the last attempted spec/string sub-match succeeded:
+    # For each line: Match succeeds (non-emptily) and the last attempted 
+    # spec/string sub-match succeeded:
     # 
     #   could the last spec keep matching?
     #     yes: save interim results and continue (next line)
@@ -561,7 +666,8 @@ module Redisk
     end
     
     # ios.seek(amount, whence=SEEK_SET) → 0
-    # Seeks to a given offset anInteger in the stream according to the value of whence:
+    # Seeks to a given offset anInteger in the stream according to the value 
+    # of whence:
     # 
     #   IO::SEEK_CUR  | Seeks to _amount_ plus current position
     #   --------------+----------------------------------------------------
@@ -591,7 +697,9 @@ module Redisk
     end
     
     # ios.sync => true or false
-    # Returns the current ``sync mode’’ of ios. When sync mode is true, all output is immediately flushed to the underlying operating system and is not buffered by Ruby internally. See also IO#fsync.
+    # Returns the current ``sync mode’’ of ios. When sync mode is true, all 
+    # output is immediately flushed to the underlying operating system and is 
+    # not buffered by Ruby internally. See also IO#fsync.
     # 
     #    f = File.new("testfile")
     #    f.sync   #=> false
@@ -600,7 +708,9 @@ module Redisk
     end
     
     # ios.sync = boolean => boolean
-    # Sets the ``sync mode’’ to true or false. When sync mode is true, all output is immediately flushed to the underlying operating system and is not buffered internally. Returns the new state. See also IO#fsync.
+    # Sets the ``sync mode’’ to true or false. When sync mode is true, all 
+    # output is immediately flushed to the underlying operating system and is 
+    # not buffered internally. Returns the new state. See also IO#fsync.
     # 
     #    f = File.new("testfile")
     #    f.sync = true
@@ -610,7 +720,10 @@ module Redisk
     end
     
     # ios.sysread(integer ) => string
-    # Reads integer bytes from ios using a low-level read and returns them as a string. Do not mix with other methods that read from ios or you may get unpredictable results. Raises SystemCallError on error and EOFError at end of file.
+    # Reads integer bytes from ios using a low-level read and returns them as 
+    # a string. Do not mix with other methods that read from ios or you may 
+    # get unpredictable results. Raises SystemCallError on error and EOFError 
+    # at end of file.
     # 
     #    f = File.new("testfile")
     #    f.sysread(16)   #=> "This is line one"
@@ -619,7 +732,9 @@ module Redisk
     end
     
     # ios.sysseek(offset, whence=SEEK_SET) => integer
-    # Seeks to a given offset in the stream according to the value of whence (see IO#seek for values of whence). Returns the new offset into the file.
+    # Seeks to a given offset in the stream according to the value of whence 
+    # (see IO#seek for values of whence). Returns the new offset into the 
+    # file.
     # 
     #    f = File.new("testfile")
     #    f.sysseek(-13, IO::SEEK_END)   #=> 53
@@ -629,7 +744,9 @@ module Redisk
     end
     
     # ios.syswrite(string) => integer
-    # Writes the given string to ios using a low-level write. Returns the number of bytes written. Do not mix with other methods that write to ios or you may get unpredictable results. Raises SystemCallError on error.
+    # Writes the given string to ios using a low-level write. Returns the 
+    # number of bytes written. Do not mix with other methods that write to ios 
+    # or you may get unpredictable results. Raises SystemCallError on error.
     # 
     #    f = File.new("out", "w")
     #    f.syswrite("ABCDEF")   #=> 6
@@ -638,7 +755,11 @@ module Redisk
     end
     
     # ios.ungetc(integer) => nil
-    # Pushes back one character (passed as a parameter) onto ios, such that a subsequent buffered read will return it. Only one character may be pushed back before a subsequent read operation (that is, you will be able to read only the last of several characters that have been pushed back). Has no effect with unbuffered reads (such as IO#sysread).
+    # Pushes back one character (passed as a parameter) onto ios, such that a 
+    # subsequent buffered read will return it. Only one character may be 
+    # pushed back before a subsequent read operation (that is, you will be 
+    # able to read only the last of several characters that have been pushed 
+    # back). Has no effect with unbuffered reads (such as IO#sysread).
     # 
     #    f = File.new("testfile")   #=> #<File:testfile>
     #    c = f.getc                 #=> 84
@@ -649,7 +770,9 @@ module Redisk
     end
     
     # ios.write(string) => integer
-    # Writes the given string to ios. The stream must be opened for writing. If the argument is not a string, it will be converted to a string using to_s. Returns the number of bytes written.
+    # Writes the given string to ios. The stream must be opened for writing. 
+    # If the argument is not a string, it will be converted to a string using 
+    # to_s. Returns the number of bytes written.
     # 
     #    count = $stdout.write( "This is a test\n" )
     #    puts "That was #{count} bytes of data"
@@ -662,9 +785,16 @@ module Redisk
     end
     
     # ios.write_nonblock(string) => integer
-    # Writes the given string to ios using write(2) system call after O_NONBLOCK is set for the underlying file descriptor.
+    # Writes the given string to ios using write(2) system call after 
+    # O_NONBLOCK is set for the underlying file descriptor.
     # 
-    # write_nonblock just calls write(2). It causes all errors write(2) causes: EAGAIN, EINTR, etc. The result may also be smaller than string.length (partial write). The caller should care such errors and partial write.
+    # write_nonblock just calls write(2). It causes all errors write(2) 
+    # causes: EAGAIN, EINTR, etc. The result may also be smaller than 
+    # string.length (partial write). The caller should care such errors and 
+    # partial write.
     # 
+    def write_nonblock(string)
+    end
+    
   end
 end
