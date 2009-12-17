@@ -1,6 +1,8 @@
 require 'redis/namespace'
+require 'redisk/io'
 
 module Redisk
+  extend self
   
   # straight up lifted from from @defunkt's resque
   # Accepts a 'hostname:port' string or a Redis server.
@@ -26,4 +28,4 @@ module Redisk
   end
   
 end
-  
+

@@ -1,5 +1,7 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+dir = File.dirname(File.expand_path(__FILE__))
+$LOAD_PATH.unshift(dir)
+$LOAD_PATH.unshift(File.join(dir, '..', 'lib'))
+require 'rubygems'
 require 'redisk'
 require 'spec'
 require 'spec/autorun'
@@ -44,6 +46,7 @@ at_exit do
   exit exit_code
 end
 
+FileUtils.mkdir_p(File.join(dir, 'tmp'))
 puts "Starting redis for testing at localhost:9736..."
-`redis-server #{dir}/redis-test.conf`
+puts `redis-server #{dir}/redis-test.conf`
 Redisk.redis = 'localhost:9736'

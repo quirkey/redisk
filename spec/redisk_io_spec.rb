@@ -6,7 +6,7 @@ describe Redisk::IO do
     @io_name = 'rails.log'
     key = Redisk::IO.list_key(@io_name)
     @file_as_array = []
-    File.foreach('fixtures/rails.log', 'r') {|f|
+    File.foreach(File.dirname(__FILE__) + '/fixtures/rails.log') {|f|
       @file_as_array << f
       Redisk.redis.lpush key, f
     }
@@ -23,7 +23,7 @@ describe Redisk::IO do
     end
     
     it 'stores the name of the key' do
-      @io.name.should == 'testio'
+      @io.name.should == @io_name
     end
   end
   
