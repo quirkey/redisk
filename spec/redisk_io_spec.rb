@@ -227,5 +227,42 @@ describe Redisk::IO do
     end
   end
   
+  describe '#seek' do
+    
+    it 'should set the lineno to the absolute location' do
+      
+    end
+    
+    it 'should set the lineno to the absolute location with SEEK_SET' do
+      
+    end
+    
+    it 'should set the lineno to the location relative to the end with SEEK_END' do
+      
+    end
+    
+    it 'should set the lineno to an offset position from the current line with SEEK_CUR' do
+      
+    end
+    
+  end
+  
+  describe '#stat' do
+    
+    it 'should return a filestat like object'
+    
+  end
+  
+  describe '#write' do
+    
+    it 'should write the contents of string to the io' do
+      
+    end
+    
+    it 'should return the number of bytes written' do
+      
+    end
+    
+  end
   
 end
