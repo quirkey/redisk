@@ -1,4 +1,4 @@
-= redis-log
+= redisk
 
 Description goes here.
 

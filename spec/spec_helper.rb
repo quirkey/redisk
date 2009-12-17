@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'redis-log'
+require 'redisk'
 require 'spec'
 require 'spec/autorun'
 
@@ -46,4 +46,4 @@ end
 
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
-# Resque.redis = 'localhost:9736'
+Redisk.redis = 'localhost:9736'
