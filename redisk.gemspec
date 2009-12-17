@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
      "lib/redisk/io.rb",
      "lib/redisk/logger.rb",
      "lib/redisk/stat.rb",
+     "redisk.gemspec",
      "spec/fixtures/rails.log",
      "spec/redis-test.conf",
      "spec/redisk_io_spec.rb",
