@@ -33,17 +33,11 @@ end
 at_exit do
   next if $!
 
-  if defined?(MiniTest)
-    exit_code = MiniTest::Unit.new.run(ARGV)
-  else
-    exit_code = Test::Unit::AutoRunner.run
-  end
-
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."
   `rm -f #{dir}/dump.rdb`
   Process.kill("KILL", pid.to_i)
-  exit exit_code
+  # exit exit_code
 end
 
 FileUtils.mkdir_p(File.join(dir, 'tmp'))
