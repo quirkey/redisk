@@ -296,7 +296,12 @@ describe Redisk::IO do
 
     describe '#stat' do
 
-      it 'should return a filestat like object'
+      it 'should return a stat like object' do
+        @stat = @io.stat
+        @stat.should be_instance_of(Redisk::Stat)
+        @stat.atime.should be_instance_of(Time)
+        @stat.size.should == 0
+      end
 
     end
 
@@ -328,7 +333,7 @@ describe Redisk::IO do
     it 'should write to the log' do
       @logger.info "This should be info"
       @logger.warn "This should be warn"
-      @io.size.should == 2
+      @io.length.should == 2
     end    
     
   end

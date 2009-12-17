@@ -1,5 +1,7 @@
 require 'logger'
 require 'redis/namespace'
+require 'redisk/helper'
+require 'redisk/stat'
 require 'redisk/io'
 
 module Redisk

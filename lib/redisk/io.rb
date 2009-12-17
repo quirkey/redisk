@@ -1,6 +1,8 @@
 module Redisk
   class IO
     include Enumerable
+    extend Helper
+    include Helper
     
     class NotImplementedError < RuntimeError; end
     class EOFError < ::EOFError; end
@@ -12,17 +14,10 @@ module Redisk
       @mode   = mode # we're going to just ignore this for now
       @buffer = nil
       @sync   = false
+      @size   = 0
       @lineno = 0
     end
     alias :for_fd :initialize
-
-    def self.redis
-      Redisk.redis
-    end
-  
-    def redis
-      self.class.redis
-    end
 
     def self.list_key(name)
       "#{name}:_list"
@@ -353,7 +348,7 @@ module Redisk
     
     # Return a string describing this IO object.
     def inspect
-      "<Redisk::IO (#{name})>"
+      "#<Redisk::IO (#{name})>"
     end
     alias :to_s :inspect
     
@@ -376,10 +371,16 @@ module Redisk
       false
     end
     
+    # the number of lines in the current list/file
     def length
       redis.llen list_key
     end
-    alias :size :length
+    alias :lines :length
+    
+    # the estimated size in bytes of the current file
+    def size
+      @size
+    end
     
     # ios.lineno => integer
     # Returns the current line number in ios. The stream must be opened for 
