@@ -289,7 +289,7 @@ module Redisk
     # 
     #    File.stat("testfile").size   #=> 66
     def size
-      read_attribute('size')
+      read_attribute('size').to_i
     end
     
     # stat.socket? => true or false

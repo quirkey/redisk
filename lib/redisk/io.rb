@@ -302,7 +302,12 @@ module Redisk
     # 
     #    no newline
     def flush
-      redis.rpush list_key, @buffer if @buffer
+      if @buffer
+        redis.rpush list_key, @buffer 
+        @size += @buffer.length
+        stat.write_attribute(:size, @size)
+        stat.write_attribute(:mtime, Time.now)
+      end
       @buffer = nil
     end
     
@@ -742,7 +747,7 @@ module Redisk
     #    s.blksize       #=> 4096
     #    s.atime         #=> Wed Apr 09 08:53:54 CDT 2003
     def stat
-      
+      @stat ||= Redisk::Stat.new(name)
     end
     
     # ios.sync => true or false
