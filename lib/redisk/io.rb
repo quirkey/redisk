@@ -3,7 +3,7 @@ module Redisk
     class NotImplementedError < RuntimeError; end
     class EOFError < ::IO::EOFError; end
     
-    attr_reader :name, :mode
+    attr_reader :name, :mode, :_
   
     def initialize(name, mode = 'rw')
       @name = name
@@ -135,7 +135,7 @@ module Redisk
     #    Hello world!
     def <<(text)
       write text
-      text
+      self
     end
     
     # ios.binmode => ios
@@ -338,7 +338,7 @@ module Redisk
       val = redis.lrange(list_key, lineno, lineno + 1)
       if val = val.first
         self.lineno += 1
-        $_ = val
+        $_ = @_ = val
         val
       end
     end
@@ -458,7 +458,9 @@ module Redisk
     # 
     #    This is 100 percent.
     def print(*args)
-      write args.collect {|a| a.to_s }
+      args.empty? ?
+        write(@_) :
+        write(args.collect {|a| a.to_s }.join)
       nil
     end
     
@@ -498,9 +500,9 @@ module Redisk
     #    a
     #    test
     def puts(*args)
-      args ? 
-        args.each {|a| write(a) } : 
-        write('')
+      args.empty? ? 
+        write('') :
+        args.each {|a| write(a) }
       nil
     end
     
@@ -817,7 +819,8 @@ module Redisk
     #    This is a test
     #    That was 15 bytes of data
     def write(string)
-      redis.rpush list_key, string.to_s
+      string = string.to_s
+      redis.rpush list_key, string
       string.length
     end
     

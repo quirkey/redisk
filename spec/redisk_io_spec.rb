@@ -167,8 +167,9 @@ describe Redisk::IO do
 
       it 'should set the value of $_' do
         val = @io.gets
-        $_.should == val
+        @io._.should == val
       end
+      
     end
 
     describe '#lineno' do
@@ -220,9 +221,9 @@ describe Redisk::IO do
       it 'should write each argument to the io' do
         @io.puts('1', '2', '3')
         @io.lineno = 100
-        @io.gets.should = '1'
-        @io.gets.should = '2'
-        @io.gets.should = '3'
+        @io.gets.should == '1'
+        @io.gets.should == '2'
+        @io.gets.should == '3'
       end
 
       it 'should write a blank string if no argument is passed' do
