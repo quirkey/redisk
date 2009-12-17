@@ -1,7 +1,8 @@
 module Redisk
   class IO
     class NotImplementedError < RuntimeError; end
-  
+    class EOFError < ::IO::EOFError; end
+    
     attr_reader :name, :mode
   
     def initialize(name, mode = 'rw')
@@ -133,7 +134,8 @@ module Redisk
     # 
     #    Hello world!
     def <<(text)
-      redis.rpush list_key, text
+      write text
+      text
     end
     
     # ios.binmode => ios
@@ -217,7 +219,11 @@ module Redisk
     #    3: This is line three
     #    4: And so on...
     def each(&block)
-      
+      rewind
+      length.times do 
+        yield gets
+      end
+      self
     end
     alias :each_line :each
     
@@ -259,7 +265,7 @@ module Redisk
     # Note that IO#eof? reads data to a input buffer. So IO#sysread doesn‘t 
     # work with IO#eof?.
     def eof
-      
+      lineno >= length
     end
     alias :eof? :eof
     
@@ -329,7 +335,12 @@ module Redisk
     #    File.new("testfile").gets   #=> "This is line one\n"
     #    $_                          #=> "This is line one\n"
     def gets
-      
+      val = redis.lrange(list_key, lineno, lineno + 1)
+      if val = val.first
+        self.lineno += 1
+        $_ = val
+        val
+      end
     end
     
     # Return a string describing this IO object.
@@ -356,6 +367,11 @@ module Redisk
       false
     end
     
+    def length
+      redis.llen list_key
+    end
+    alias :size :length
+    
     # ios.lineno => integer
     # Returns the current line number in ios. The stream must be opened for 
     # reading. lineno counts the number of times gets is called, rather than 
@@ -369,7 +385,7 @@ module Redisk
     #    f.gets     #=> "This is line two\n"
     #    f.lineno   #=> 2
     def lineno
-      
+      @lineno
     end
     
     # ios.lineno = integer => integer
@@ -385,7 +401,7 @@ module Redisk
     #    f.gets                     #=> "This is line two\n"
     #    $. # lineno of last read   #=> 1001
     def lineno=(num)
-      
+      @lineno = num
     end
     
     # ios.pid => fixnum
@@ -442,14 +458,16 @@ module Redisk
     # 
     #    This is 100 percent.
     def print(*args)
-      
+      write args.collect {|a| a.to_s }
+      nil
     end
     
     # ios.printf(format_string [, obj, ...] ) => nil
     # Formats and writes to ios, converting parameters under control of the 
     # format string. See Kernel#sprintf for details.
     def printf(format_string, *args)
-      
+      write sprintf(format_string, *args)
+      nil
     end
     
     # ios.putc(obj) => obj
@@ -480,7 +498,10 @@ module Redisk
     #    a
     #    test
     def puts(*args)
-      
+      args ? 
+        args.each {|a| write(a) } : 
+        write('')
+      nil
     end
     
     # ios.read([length [, buffer]]) => string, buffer, or nil
@@ -541,7 +562,11 @@ module Redisk
     # ios.readline(sep_string=$/) => string
     # Reads a line as with IO#gets, but raises an EOFError on end of file.
     def readline
-      
+      if eof? 
+        raise EOFError, "At the end of the IO #{inspect}"
+      else
+        gets
+      end
     end
     
     # ios.readlines(sep_string=$/) => array
@@ -553,7 +578,7 @@ module Redisk
     #    f = File.new("testfile")
     #    f.readlines[0]   #=> "This is line one\n"
     def readlines
-      
+      self.class.readlines(name)
     end
     
     # ios.readpartial(maxlen) => string
@@ -635,7 +660,7 @@ module Redisk
     #    f.lineno     #=> 0
     #    f.readline   #=> "This is line one\n"
     def rewind
-      
+      self.lineno = 0
     end
     
     # scanf(str,&b)
@@ -665,6 +690,10 @@ module Redisk
       
     end
     
+    SEEK_SET = ::IO::SEEK_SET
+    SEEK_END = ::IO::SEEK_END
+    SEEK_CUR = ::IO::SEEK_CUR
+    
     # ios.seek(amount, whence=SEEK_SET) → 0
     # Seeks to a given offset anInteger in the stream according to the value 
     # of whence:
@@ -680,8 +709,16 @@ module Redisk
     #    f = File.new("testfile")
     #    f.seek(-13, IO::SEEK_END)   #=> 0
     #    f.readline                  #=> "And so on...\n"
-    def seek
-      
+    def seek(offset, whence = SEEK_SET)
+      case whence
+      when SEEK_SET
+        self.lineno = offset
+      when SEEK_END
+        self.lineno = length + offset
+      when SEEK_CUR
+        self.lineno += offset
+      end
+      0
     end
     
     # ios.stat => stat
@@ -739,8 +776,7 @@ module Redisk
     #    f = File.new("testfile")
     #    f.sysseek(-13, IO::SEEK_END)   #=> 53
     #    f.sysread(10)                  #=> "And so on."
-    def sysseek(offset, whence = ::IO::SEEK_SET)
-      
+    def sysseek(offset, whence = SEEK_SET)
     end
     
     # ios.syswrite(string) => integer
@@ -781,7 +817,8 @@ module Redisk
     #    This is a test
     #    That was 15 bytes of data
     def write(string)
-      
+      redis.rpush list_key, string.to_s
+      string.length
     end
     
     # ios.write_nonblock(string) => integer

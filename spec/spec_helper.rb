@@ -1,6 +1,7 @@
 dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift(dir)
 $LOAD_PATH.unshift(File.join(dir, '..', 'lib'))
+require 'fileutils'
 require 'rubygems'
 require 'redisk'
 require 'spec'
