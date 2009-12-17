@@ -88,6 +88,144 @@ describe Redisk::IO do
     end
     
   end
+  
+  describe '#<<' do
     
+    it 'should append a line to the io' do
+      
+    end
+    
+    it 'should return the text' do
+      
+    end
+    
+    it 'should be able to chain' do
+      
+    end
+    
+  end
+    
+  describe '#each' do
+    
+    it 'should yield each line of the file' do
+      
+    end
+    
+    it 'should advance the lineno for each iteration' do
+      
+    end
+    
+  end
+  
+  describe '#eof' do
+    
+    it 'should return false if lineno is not the end of the file' do
+      
+    end
+    
+    it 'should return true if lineno is at the end of the file' do
+      
+    end
+    
+  end
+  
+  describe '#gets' do
+    
+    it 'should return the next line from the io' do
+      
+    end
+    
+    it 'should advance the filedescriptor lineno' do
+      
+    end
+    
+    it 'should set the value of $_' do
+      
+    end
+  end
+  
+  describe '#lineno' do
+    it 'should return the current lineno' do
+      
+    end
+  end
+  
+  describe '#lineno=' do
+    it 'should set the current lineno' do
+      
+    end
+    
+    it 'should raise error if num is not a string'
+  end
+  
+  describe '#print' do
+    
+    it 'should append arguments into a string' do
+      
+    end
+    
+    it 'should write arguments to the io' do
+      
+    end
+    
+    it 'should write the contents of $_ if no arguments are provided' do
+      
+    end
+  end
+  
+  describe '#printf' do
+    
+    it 'should run the arguments through sprintf' do
+      
+    end
+    
+    it 'should append to the io' do
+      
+    end
+  end
+  
+  describe '#puts' do
+    
+    it 'should write each argument to the io' do
+      
+    end
+    
+    it 'should write a blank string if no argument is passed' do
+      
+    end
+    
+  end
+  
+  describe '#readline' do
+    
+    it 'should read the next line with gets' do
+      
+    end
+    
+    it 'should raise EOFError at the end of the lines' do
+      
+    end
+    
+  end
+  
+  describe '#readlines' do
+    
+    it 'should return the lines as an array' do
+      
+    end
+    
+  end
+  
+  describe '#rewind' do
+    
+    it 'should set the lineno to 0' do
+      
+    end
+    
+    it 'should return 0' do
+      
+    end
+  end
+  
   
 end
