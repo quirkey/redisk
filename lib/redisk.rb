@@ -6,6 +6,8 @@ require 'redisk/io'
 require 'redisk/logger'
 
 module Redisk
+  VERSION = '0.1.0'
+  
   extend self
   
   # straight up lifted from from @defunkt's resque

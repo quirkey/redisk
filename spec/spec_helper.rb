@@ -32,13 +32,13 @@ end
 #
 
 at_exit do
-  next if $!
-
+  exit_with = $!
+  next unless exit_with.is_a?(SystemExit)
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."
   `rm -f #{dir}/dump.rdb`
   Process.kill("KILL", pid.to_i)
-  # exit exit_code
+  exit exit_with.status
 end
 
 FileUtils.mkdir_p(File.join(dir, 'tmp'))

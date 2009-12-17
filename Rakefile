@@ -1,17 +1,21 @@
+$LOAD_PATH.unshift(File.join(File.dirname(File.expand_path(__FILE__)), 'lib'))
 require 'rubygems'
 require 'rake'
+require 'redisk'
 
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "redisk"
+    gem.version = Redisk::VERSION
     gem.summary = %Q{TODO: one-line summary of your gem}
     gem.description = %Q{TODO: longer description of your gem}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/redis_log"
     gem.authors = ["Aaron Quint"]
+    gem.add_dependency "redis", ">=0.1.1"
+    gem.add_dependency "redis-namespace", ">=0.1.0"
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
