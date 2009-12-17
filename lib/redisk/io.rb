@@ -807,6 +807,17 @@ module Redisk
       
     end
     
+    # truncate the IO to size, taking only the last [size] lines
+    def truncate(size = 0)
+      size = size.to_i
+      if size == 0
+        redis.del list_key
+      else
+        redis.ltrim list_key, -size, -1
+      end
+      length
+    end
+    
     # ios.ungetc(integer) => nil
     # Pushes back one character (passed as a parameter) onto ios, such that a 
     # subsequent buffered read will return it. Only one character may be 

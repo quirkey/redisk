@@ -3,6 +3,7 @@ require 'redis/namespace'
 require 'redisk/helper'
 require 'redisk/stat'
 require 'redisk/io'
+require 'redisk/logger'
 
 module Redisk
   extend self

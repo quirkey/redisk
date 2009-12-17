@@ -318,18 +318,26 @@ describe Redisk::IO do
       end
 
     end
+    
+    describe '#truncate(size)' do
+      
+      it 'should only keep the last [size] lines' do
+        @io.truncate(10).should == 10
+        @io.length.should == 10
+        @io.readlines.should == @file_as_array[90...100]
+      end
+      
+    end
+
   end
   
   describe 'As an interface for logger' do
     before do
       @io = Redisk::IO.new('test.log')
+      @io.truncate
       @logger = Logger.new(@io)
     end
-    
-    after do
-      Redisk.redis.del Redisk::IO.list_key('test.log')
-    end
-    
+     
     it 'should write to the log' do
       @logger.info "This should be info"
       @logger.warn "This should be warn"

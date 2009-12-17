@@ -6,9 +6,9 @@ describe Redisk::Stat do
   end
   
   after(:each) do
-    keys = Redisk.redis.keys('test_stat:_stat:*')
+    keys = Redisk.redis.keys('test_stat:*')
     keys.each do |key|
-      Redisk.redis.del key.gsub(/^redisk/, '')
+      Redisk.redis.del key.gsub(/^redisk\:/, '')
     end
   end
   
