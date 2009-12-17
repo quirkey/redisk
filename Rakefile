@@ -8,8 +8,8 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "redisk"
     gem.version = Redisk::VERSION
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{An interface to Redis that mimic's Ruby's IO classes}
+    gem.description = %Q{Redisk includes Redisk::IO which is ~ Ruby's stdlib IO. It can be used with stdlib's Logger to log directly to redis}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/redis_log"
     gem.authors = ["Aaron Quint"]

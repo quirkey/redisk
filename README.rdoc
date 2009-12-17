@@ -1,7 +1,46 @@
 = redisk
 
-Description goes here.
+An interface to Redis that mimic's Ruby's IO classes
 
+== WHAT
+
+Redis (http://code.google.com/p/redis/) is a super awesome persisted key-value store.
+
+Why are we still logging to files then?
+
+Redisk is a set of Ruby classes that mimic's Ruby's built in IO classes to allow
+drop in replacement for logging and other fun things. 
+
+== USAGE
+
+Currently, Redisk provides two main classes Redisk::IO and Redisk::Logger.
+
+Redisk::IO implements _most_ of the methods of Ruby's IO class (http://ruby-doc.org/core/classes/IO.html)
+
+    require 'redisk'
+    
+    io = Redisk::IO.new('mylog.log') # not a file, a Redis List
+    io.puts "Log this!"
+    io.gets #=> "Log this!"
+    io.gets #=> nil
+    io.lineno = 2
+    
+Its much more interesting to use it with logger.
+
+    logger = Logger.new(Redisk::IO.new('test.log))
+    logger.info("Hahah, I'm logging to redis")
+    logger.warn("whu?")
+    logger.error("zuh")
+    
+Theres also a nifty wrapper for that behavior:
+
+    logger = Redisk::Logger.new('test.log')
+    logger.info "10 less characters!"    
+
+By default, Redisk uses the Redis on localhost:6379, but you can change that by setting
+
+    Redisk.redis = 'myhost:myport'
+    
 == Note on Patches/Pull Requests
  
 * Fork the project.
