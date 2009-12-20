@@ -12,9 +12,11 @@ module Redisk
     def initialize(name, mode = 'rw')
       @name   = name
       @mode   = mode # we're going to just ignore this for now
-      @buffer = nil
+      @write_buffer = nil
+      @read_buffer = nil
       @sync   = false
       @size   = 0
+      @pos    = 0
       @lineno = 0
     end
     alias :for_fd :initialize
@@ -133,10 +135,10 @@ module Redisk
     # 
     #    Hello world!
     def <<(text)
-      @buffer ||= ''
-      @buffer << text
+      @write_buffer ||= ''
+      @write_buffer << text
       flush if sync
-      @buffer
+      @write_buffer
     end
     
     # ios.binmode => ios
@@ -202,7 +204,7 @@ module Redisk
     #    f.closed?       #=> false
     #    f.close_read    #=> nil
     #    f.closed?       #=> true
-    def closed
+    def closed?
       
     end
     
@@ -302,13 +304,13 @@ module Redisk
     # 
     #    no newline
     def flush
-      if @buffer
-        redis.rpush list_key, @buffer 
-        @size += @buffer.length
+      if @write_buffer
+        redis.rpush list_key, @write_buffer 
+        @size += @write_buffer.length
         stat.write_attribute(:size, @size)
         stat.write_attribute(:mtime, Time.now)
       end
-      @buffer = nil
+      @write_buffer = nil
     end
     
     # ios.fsync => 0 or nil
@@ -318,6 +320,7 @@ module Redisk
     # from Ruby‘s buffers, but doesn‘t not guarantee that the underlying 
     # operating system actually writes it to disk.
     def fsync
+      false
     end
     
     # ios.getc => fixnum or nil
@@ -416,7 +419,7 @@ module Redisk
     #    f.gets                     #=> "This is line two\n"
     #    $. # lineno of last read   #=> 1001
     def lineno=(num)
-      @lineno = num
+      @lineno = num.to_i
     end
     
     # ios.pid => fixnum
@@ -434,7 +437,7 @@ module Redisk
     #    In child, pid is 26209
     #    In parent, child pid is 26209
     def pid
-      
+      Process.pid
     end
     
     # ios.pos => integer
@@ -446,7 +449,7 @@ module Redisk
     #    f.gets   #=> "This is line one\n"
     #    f.pos    #=> 17
     def pos
-      
+      @pos
     end
     alias :tell :pos
     
@@ -457,7 +460,7 @@ module Redisk
     #    f.pos = 17
     #    f.gets   #=> "This is line two\n"
     def pos=(num)
-      
+      @pos = num.to_i
     end
       
     # ios.print() => nil
@@ -497,7 +500,7 @@ module Redisk
     # 
     #    AA
     def putc(obj)
-      
+      self << obj.is_a?(Fixnum) ? obj : obj.to_s[0]
     end
     
     # ios.puts(obj, ...) => nil
@@ -532,7 +535,7 @@ module Redisk
     # 
     #    f = File.new("testfile")
     #    f.read(16)   #=> "This is line one"
-    def read
+    def read(length = nil, buffer = nil)
       
     end
     
@@ -829,7 +832,7 @@ module Redisk
     #    c = f.getc                 #=> 84
     #    f.ungetc(c)                #=> nil
     #    f.getc                     #=> 84
-    def ungetc(int)
+    def ungetc(integer)
       
     end
     
@@ -846,7 +849,7 @@ module Redisk
     #    That was 15 bytes of data
     def write(string)
       string = string.to_s
-      @buffer = string
+      @write_buffer = string
       flush
       string.length
     end

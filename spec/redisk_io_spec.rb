@@ -136,7 +136,19 @@ describe Redisk::IO do
       end
 
     end
-
+    
+    describe '#each_byte' do
+      
+      it 'should yield each byte as a fixnum to a block' do
+        
+      end
+      
+      it 'should advance the pos of the io' do
+        
+      end
+      
+    end
+    
     describe '#eof' do
 
       it 'should return false if lineno is not the end of the file' do
@@ -150,6 +162,22 @@ describe Redisk::IO do
 
     end
 
+    describe '#getc' do
+      
+      it 'should get the next byte from the file as a fixnum' do
+        
+      end
+      
+      it 'should increment the pos of the io' do
+        
+      end
+      
+      it 'should get the next line if necessary' do
+        
+      end
+
+    end
+      
     describe '#gets' do
 
       it 'should return the next line from the io' do
@@ -184,6 +212,26 @@ describe Redisk::IO do
         @io.lineno.should == 50
         @io.gets.should == @file_as_array[50]
       end
+    end
+    
+    describe '#pos' do
+      
+      it 'should return the current pos' do
+        
+      end
+      
+    end
+    
+    describe '#pos=' do
+      
+      it 'should set the pos' do
+        
+      end
+      
+      it 'should set the lineno based on the pos' do
+        
+      end
+      
     end
 
     describe '#print' do
@@ -232,6 +280,42 @@ describe Redisk::IO do
         @io.gets.should == ''
       end
 
+    end
+
+    describe '#read' do
+      
+      it 'should read to the end of the file if [length] is ommited' do
+        
+      end
+      
+      it 'should read into the [buffer] if a buffer is passed' do
+        
+      end
+      
+      it 'should read [length] bytes from the IO' do
+        
+      end
+      
+      it 'should return nil if [length] is passed at the eof' do
+        
+      end
+      
+      it 'should return "" if no [length] is passed at the eof' do
+        
+      end
+      
+    end
+
+    describe '#readbytes' do
+      
+      it 'should read [n] bytes from the io' do
+        
+      end
+      
+      it 'should raise EOFError if the data is nil' do
+        
+      end
+      
     end
 
     describe '#readline' do
@@ -325,6 +409,18 @@ describe Redisk::IO do
         @io.truncate(10).should == 10
         @io.length.should == 10
         @io.readlines.should == @file_as_array[90...100]
+      end
+      
+    end
+
+    describe '#ungetc' do
+      
+      it 'should put the string represented by a fixnum at the end of the io buffer' do
+        
+      end
+      
+      it 'should return nil' do
+        
       end
       
     end

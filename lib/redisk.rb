@@ -33,5 +33,13 @@ module Redisk
     self.redis
   end
   
+  def io(*args)
+    Redisk::IO.new(*args)
+  end
+  
+  def logger(*args)
+    Redisk::Logger.new(*args)
+  end
+  
 end
 
