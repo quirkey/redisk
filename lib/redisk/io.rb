@@ -10,14 +10,14 @@ module Redisk
     attr_reader :name, :mode, :_
   
     def initialize(name, mode = 'rw')
-      @name   = name
-      @mode   = mode # we're going to just ignore this for now
+      @name         = name
+      @mode         = mode # we're going to just ignore this for now
       @write_buffer = nil
-      @read_buffer = nil
-      @sync   = false
-      @size   = 0
-      @pos    = 0
-      @lineno = 0
+      @read_buffer  = nil
+      @sync         = false
+      @size         = 0
+      @pos          = 0
+      @lineno       = 0
     end
     alias :for_fd :initialize
 
@@ -97,7 +97,7 @@ module Redisk
       start_i = offset || 0
       end_i   = length ? start_i + (length - 1) : -1
       values  = redis.lrange(list_key(name), start_i, end_i)
-      values.join("\n")
+      values.join("")
     end
   
     # Reads the entire file specified by name as individual lines, and returns 
@@ -240,7 +240,11 @@ module Redisk
     #    f.each_byte {|x| checksum ^= x }   #=> #<File:testfile>
     #    checksum                           #=> 12
     def each_byte
-      
+      rewind
+      while !eof?
+        yield getc
+      end
+      self
     end
     
     # ios.eof => true or false
@@ -268,7 +272,7 @@ module Redisk
     # Note that IO#eof? reads data to a input buffer. So IO#sysread doesn‘t 
     # work with IO#eof?.
     def eof
-      lineno >= length
+      lineno >= length || pos > eof?
     end
     alias :eof? :eof
     
@@ -305,7 +309,7 @@ module Redisk
     #    no newline
     def flush
       if @write_buffer
-        redis.rpush list_key, @write_buffer 
+        redis.rpush list_key, "#{@write_buffer}\n" 
         @size += @write_buffer.length
         stat.write_attribute(:size, @size)
         stat.write_attribute(:mtime, Time.now)
@@ -331,6 +335,7 @@ module Redisk
     #    f.getc   #=> 84
     #    f.getc   #=> 104
     def getc
+      "" << read(1)
     end
     
     # ios.gets(sep_string=$/) => string or nil
@@ -350,6 +355,7 @@ module Redisk
       if val = val.first
         self.lineno += 1
         $_ = @_ = val
+        @pos += val.length
         val
       end
     end
@@ -536,7 +542,19 @@ module Redisk
     #    f = File.new("testfile")
     #    f.read(16)   #=> "This is line one"
     def read(length = nil, buffer = nil)
-      
+      if length 
+        last_line = @read_buffer
+        while @read_buffer < length
+          last_line = gets
+          @read_buffer << last_line
+        end
+        result = @read_buffer[0...length]
+        @read_buffer = @read_buffer[length..-1]
+        @pos -= @read_buffer.length
+      else
+        result = readlines.join("")
+      end
+      buffer ? buffer = result : result
     end
     
     # ios.read_nonblock(maxlen) => string
@@ -569,7 +587,14 @@ module Redisk
     # read data is obtainable via its data method.
     # 
     def readbytes(n)
-      
+      result = read(n)
+      if result.length < n
+        raise TruncatedDataError, result
+      elsif result.nil?
+        raise EOFError, "You have reached the end of the IO stream"
+      else
+        result
+      end
     end
     
     # ios.readchar => fixnum

@@ -8,7 +8,7 @@ describe Redisk::IO do
     @file_as_array = []
     File.foreach(File.dirname(__FILE__) + '/fixtures/rails.log') {|f|
       @file_as_array << f
-      Redisk.redis.rpush @key, f
+      Redisk.redis.rpush @key, "#{f}\n"
     }
     @io = Redisk::IO.new(@io_name)
   end
@@ -99,7 +99,7 @@ describe Redisk::IO do
       it 'should append a line to the io' do
         @io << 'whu'
         @io.lineno = 100
-        @io.gets.should == 'whu'
+        @io.gets.should == "whu"
       end
 
       it 'should return the text' do
@@ -109,7 +109,7 @@ describe Redisk::IO do
       it 'should be able to chain' do
         @io << 'whu ' << 'zuh'
         @io.lineno = 100
-        @io.gets.should == 'whu zuh'
+        @io.gets.should == "whu zuh"
       end
 
     end
@@ -140,11 +140,21 @@ describe Redisk::IO do
     describe '#each_byte' do
       
       it 'should yield each byte as a fixnum to a block' do
-        
+        i = 0
+        all_bytes = @file_as_array.join('')
+        @io.each_byte {|b| 
+          b.should be_kind_of(Fixnum)
+          b.should == all_bytes[i]
+          i+=1
+        }
       end
       
       it 'should advance the pos of the io' do
-        
+        i = 0
+        @io.each_byte {|b|
+          i+=1
+          i.pos.should == i
+        }
       end
       
     end
@@ -165,15 +175,21 @@ describe Redisk::IO do
     describe '#getc' do
       
       it 'should get the next byte from the file as a fixnum' do
-        
+        val = @io.getc
+        val.should be_kind_of(Fixnum)
+        val.should == @file_as_array[0][0]
       end
       
       it 'should increment the pos of the io' do
-        
+        @io.getc
+        @io.pos.should == 1
+        @io.getc
+        @io.pos.should == 2
       end
       
       it 'should get the next line if necessary' do
-        
+        @io.pos = @file_as_array[0].length
+        @io.getc.should == @file_as_array[1][0]
       end
 
     end
@@ -217,7 +233,7 @@ describe Redisk::IO do
     describe '#pos' do
       
       it 'should return the current pos' do
-        
+        @io.pos.should == 0
       end
       
     end
@@ -225,11 +241,14 @@ describe Redisk::IO do
     describe '#pos=' do
       
       it 'should set the pos' do
-        
+        @io.pos = 5
+        @io.pos.should == 5
+        @io.getc.should == @file_as_array[0][5]
       end
       
       it 'should set the lineno based on the pos' do
-        
+        @io.pos = @file_as_array[0].length + 2
+        @io.lineno.should == 1
       end
       
     end
@@ -285,23 +304,30 @@ describe Redisk::IO do
     describe '#read' do
       
       it 'should read to the end of the file if [length] is ommited' do
-        
+        @io.read.should == @file_as_array.join("\n")
       end
       
       it 'should read into the [buffer] if a buffer is passed' do
-        
+        string = "new string\n"
+        @io.read(nil, string)
+        string.should == "new string\n" + @file_as_array.join("\n")
       end
       
       it 'should read [length] bytes from the IO' do
-        
+        val = @io.read(20)
+        val.length.should == 20
       end
       
       it 'should return nil if [length] is passed at the eof' do
-        
+        @io.pos = 1000000
+        @io.eof?.should == true
+        @io.read(5).should == nil
       end
       
       it 'should return "" if no [length] is passed at the eof' do
-        
+        @io.pos = 1000000
+        @io.eof?.should == true
+        @io.read(nil).should == ""
       end
       
     end
@@ -309,11 +335,17 @@ describe Redisk::IO do
     describe '#readbytes' do
       
       it 'should read [n] bytes from the io' do
-        
+        val = @io.readbytes(10)
+        val.length.should == 10
+        val.should == @file_as_array.join("\n")[0...10]
       end
       
       it 'should raise EOFError if the data is nil' do
-        
+        @io.each_byte {|b| b }
+        @io.eof?.should == true
+        lambda {
+          @io.readbytes(10)
+        }.should raise_error(EOFError)
       end
       
     end
@@ -416,11 +448,14 @@ describe Redisk::IO do
     describe '#ungetc' do
       
       it 'should put the string represented by a fixnum at the end of the io buffer' do
-        
+        @io.each_byte {|b| b }
+        @io.ungetc 65
+        @io.flush
+        @io.gets.should == "A"
       end
       
       it 'should return nil' do
-        
+        @io.ungetc(65).should == nil
       end
       
     end
