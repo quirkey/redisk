@@ -272,7 +272,7 @@ module Redisk
     # Note that IO#eof? reads data to a input buffer. So IO#sysread doesn‘t 
     # work with IO#eof?.
     def eof
-      lineno >= length || pos > eof?
+      lineno >= length || pos >= size
     end
     alias :eof? :eof
     
@@ -309,7 +309,7 @@ module Redisk
     #    no newline
     def flush
       if @write_buffer
-        redis.rpush list_key, "#{@write_buffer}\n" 
+        redis.rpush list_key, @write_buffer
         @size += @write_buffer.length
         stat.write_attribute(:size, @size)
         stat.write_attribute(:mtime, Time.now)
@@ -525,8 +525,11 @@ module Redisk
     #    test
     def puts(*args)
       args.empty? ? 
-        write('') :
-        args.each {|a| write(a) }
+        write("\n") :
+        args.each {|a| 
+          a += "\n" if a !~ /\n$/
+          write(a) 
+        }
       nil
     end
     
@@ -542,19 +545,24 @@ module Redisk
     #    f = File.new("testfile")
     #    f.read(16)   #=> "This is line one"
     def read(length = nil, buffer = nil)
-      if length 
-        last_line = @read_buffer
-        while @read_buffer < length
-          last_line = gets
-          @read_buffer << last_line
+      if eof
+        length ? nil : ""
+      else        
+        if length 
+          @read_buffer ||= ""
+          last_line = @read_buffer 
+          while @read_buffer.length < length
+            last_line = gets
+            @read_buffer << last_line
+          end
+          result = @read_buffer[0...length]
+          @read_buffer = @read_buffer[length..-1] || ""
+          @pos -= @read_buffer.length
+        else
+          result = readlines.join("")
         end
-        result = @read_buffer[0...length]
-        @read_buffer = @read_buffer[length..-1]
-        @pos -= @read_buffer.length
-      else
-        result = readlines.join("")
+        buffer ? buffer = result : result
       end
-      buffer ? buffer = result : result
     end
     
     # ios.read_nonblock(maxlen) => string
@@ -588,7 +596,7 @@ module Redisk
     # 
     def readbytes(n)
       result = read(n)
-      if result.length < n
+      if result && result.length < n
         raise TruncatedDataError, result
       elsif result.nil?
         raise EOFError, "You have reached the end of the IO stream"
@@ -706,6 +714,7 @@ module Redisk
     #    f.readline   #=> "This is line one\n"
     def rewind
       self.lineno = 0
+      self.pos    = 0
     end
     
     # scanf(str,&b)
@@ -858,7 +867,7 @@ module Redisk
     #    f.ungetc(c)                #=> nil
     #    f.getc                     #=> 84
     def ungetc(integer)
-      
+      self << ("" << integer)
     end
     
     # ios.write(string) => integer
@@ -874,7 +883,7 @@ module Redisk
     #    That was 15 bytes of data
     def write(string)
       string = string.to_s
-      @write_buffer = string
+      self << string
       flush
       string.length
     end

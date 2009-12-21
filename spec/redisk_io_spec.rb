@@ -8,7 +8,7 @@ describe Redisk::IO do
     @file_as_array = []
     File.foreach(File.dirname(__FILE__) + '/fixtures/rails.log') {|f|
       @file_as_array << f
-      Redisk.redis.rpush @key, "#{f}\n"
+      Redisk.redis.rpush @key, f
     }
     @io = Redisk::IO.new(@io_name)
   end
@@ -288,15 +288,15 @@ describe Redisk::IO do
       it 'should write each argument to the io' do
         @io.puts('1', '2', '3')
         @io.lineno = 100
-        @io.gets.should == '1'
-        @io.gets.should == '2'
-        @io.gets.should == '3'
+        @io.gets.should == "1\n"
+        @io.gets.should == "2\n"
+        @io.gets.should == "3\n"
       end
 
       it 'should write a blank string if no argument is passed' do
         @io.puts
         @io.lineno = 100
-        @io.gets.should == ''
+        @io.gets.should == "\n"
       end
 
     end
@@ -448,9 +448,9 @@ describe Redisk::IO do
     describe '#ungetc' do
       
       it 'should put the string represented by a fixnum at the end of the io buffer' do
-        @io.each_byte {|b| b }
         @io.ungetc 65
         @io.flush
+        @io.each_byte {|b| b }
         @io.gets.should == "A"
       end
       
