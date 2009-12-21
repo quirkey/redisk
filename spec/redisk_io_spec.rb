@@ -29,6 +29,11 @@ describe Redisk::IO do
     it 'stores the name of the key' do
       @io.name.should == @io_name
     end
+    
+    it 'should be open' do
+      @io.closed?.should == false
+    end
+    
   end
 
   describe 'foreach' do
@@ -68,15 +73,15 @@ describe Redisk::IO do
   describe 'read' do
 
     it 'should return the entire contents without arguments' do
-      Redisk::IO.read(@io_name).should == @file_as_array.join("\n")
+      Redisk::IO.read(@io_name).should == @file_as_array.join("")
     end
 
     it 'should return the first [length] contents' do
-      Redisk::IO.read(@io_name, 2).should == @file_as_array[0..1].join("\n")
+      Redisk::IO.read(@io_name, 2).should == @file_as_array[0..1].join("")
     end
 
     it 'should return [length] contents starting at [offset]' do
-      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..3].join("\n")
+      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..3].join("")
     end
 
   end
@@ -113,6 +118,52 @@ describe Redisk::IO do
       end
 
     end
+    
+    describe '#close_read' do
+      
+      it 'should close the io for reading' do
+        @io.close_read
+        lambda {
+          @io.gets
+        }.should raise_error(IOError)
+      end
+      
+    end
+    
+    describe '#close_write' do
+      it 'should close the io for writing' do
+        @io.close_write
+        lambda {
+          @io.puts
+        }.should raise_error(IOError)
+      end
+      
+    end
+    
+    describe '#close' do
+      
+      it 'should close for reading and writing' do
+        @io.close
+        lambda {
+          @io.puts
+        }.should raise_error(IOError)
+        lambda {
+          @io.gets
+        }.should raise_error(IOError)
+      end
+      
+    end
+    
+    describe '#closed?' do
+      
+      it 'should only return true if both streams are closed' do
+        @io.close_read
+        @io.closed?.should == false
+        @io.close_write
+        @io.closed?.should == true
+      end
+      
+    end
 
     describe '#each' do
 
@@ -144,7 +195,7 @@ describe Redisk::IO do
         all_bytes = @file_as_array.join('')
         @io.each_byte {|b| 
           b.should be_kind_of(Fixnum)
-          b.should == all_bytes[i]
+          b.should == all_bytes[i].ord
           i+=1
         }
       end
@@ -153,7 +204,7 @@ describe Redisk::IO do
         i = 0
         @io.each_byte {|b|
           i+=1
-          i.pos.should == i
+          @io.pos.should == i
         }
       end
       
@@ -177,7 +228,7 @@ describe Redisk::IO do
       it 'should get the next byte from the file as a fixnum' do
         val = @io.getc
         val.should be_kind_of(Fixnum)
-        val.should == @file_as_array[0][0]
+        val.should == @file_as_array[0].ord
       end
       
       it 'should increment the pos of the io' do
@@ -188,8 +239,8 @@ describe Redisk::IO do
       end
       
       it 'should get the next line if necessary' do
-        @io.pos = @file_as_array[0].length
-        @io.getc.should == @file_as_array[1][0]
+        @io.pos = @file_as_array[0].length + 1
+        @io.getc.should == @file_as_array[1][0].ord
       end
 
     end
@@ -243,7 +294,7 @@ describe Redisk::IO do
       it 'should set the pos' do
         @io.pos = 5
         @io.pos.should == 5
-        @io.getc.should == @file_as_array[0][5]
+        @io.getc.should == @file_as_array[0].ord
       end
       
       it 'should set the lineno based on the pos' do
@@ -304,13 +355,13 @@ describe Redisk::IO do
     describe '#read' do
       
       it 'should read to the end of the file if [length] is ommited' do
-        @io.read.should == @file_as_array.join("\n")
+        @io.read.should == @file_as_array.join("")
       end
       
       it 'should read into the [buffer] if a buffer is passed' do
         string = "new string\n"
         @io.read(nil, string)
-        string.should == "new string\n" + @file_as_array.join("\n")
+        string.should == "new string\n" + @file_as_array.join("")
       end
       
       it 'should read [length] bytes from the IO' do
@@ -337,7 +388,7 @@ describe Redisk::IO do
       it 'should read [n] bytes from the io' do
         val = @io.readbytes(10)
         val.length.should == 10
-        val.should == @file_as_array.join("\n")[0...10]
+        val.should == @file_as_array.join("")[0...10]
       end
       
       it 'should raise EOFError if the data is nil' do
@@ -416,7 +467,7 @@ describe Redisk::IO do
         @stat = @io.stat
         @stat.should be_instance_of(Redisk::Stat)
         @stat.atime.should be_instance_of(Time)
-        @stat.size.should == 0
+        @stat.size.should == @file_as_array.join('').length
       end
 
     end
@@ -450,8 +501,9 @@ describe Redisk::IO do
       it 'should put the string represented by a fixnum at the end of the io buffer' do
         @io.ungetc 65
         @io.flush
-        @io.each_byte {|b| b }
-        @io.gets.should == "A"
+        last_char = nil
+        @io.each_byte {|b| last_char = b }
+        last_char.should == 65
       end
       
       it 'should return nil' do

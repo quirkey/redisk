@@ -6,18 +6,22 @@ module Redisk
     
     class NotImplementedError < RuntimeError; end
     class EOFError < ::EOFError; end
+    class IOError < ::IOError; end
     
     attr_reader :name, :mode, :_
   
-    def initialize(name, mode = 'rw')
+    def initialize(name, mode = 'r')
       @name         = name
       @mode         = mode # we're going to just ignore this for now
+      @read_open    = true
+      @write_open   = true
       @write_buffer = nil
       @read_buffer  = nil
       @sync         = false
-      @size         = 0
       @pos          = 0
       @lineno       = 0
+      @size         = readlines.join('').length
+      rewind
     end
     alias :for_fd :initialize
 
@@ -156,7 +160,9 @@ module Redisk
     # 
     # If ios is opened by IO.popen, close sets $?.
     def close
-      
+      flush
+      close_read
+      close_write
     end 
     
     # ios.close_read => nil
@@ -172,7 +178,8 @@ module Redisk
     #    prog.rb:3:in `readlines': not opened for reading (IOError)
     #     from prog.rb:3
     def close_read
-      
+      @read_open = false
+      nil
     end
     
     # ios.close_write => nil
@@ -189,7 +196,8 @@ module Redisk
     #     from prog.rb:3:in `print'
     #     from prog.rb:3
     def close_write
-      
+      @write_open = false
+      nil
     end
 
     # ios.closed? => true or false
@@ -205,7 +213,7 @@ module Redisk
     #    f.close_read    #=> nil
     #    f.closed?       #=> true
     def closed?
-      
+      !(@write_open || @read_open)
     end
     
     # ios.each(sep_string=$/) {|line| block } => ios
@@ -308,7 +316,7 @@ module Redisk
     # 
     #    no newline
     def flush
-      if @write_buffer
+      if @write_buffer && @write_buffer != ''
         redis.rpush list_key, @write_buffer
         @size += @write_buffer.length
         stat.write_attribute(:size, @size)
@@ -335,7 +343,7 @@ module Redisk
     #    f.getc   #=> 84
     #    f.getc   #=> 104
     def getc
-      "" << read(1)
+      read(1).ord
     end
     
     # ios.gets(sep_string=$/) => string or nil
@@ -350,6 +358,7 @@ module Redisk
     #    File.new("testfile").gets   #=> "This is line one\n"
     #    $_                          #=> "This is line one\n"
     def gets
+      check_stream_open!(:read)
       flush
       val = redis.lrange(list_key, lineno, lineno + 1)
       if val = val.first
@@ -426,6 +435,14 @@ module Redisk
     #    $. # lineno of last read   #=> 1001
     def lineno=(num)
       @lineno = num.to_i
+    end
+    
+    def open?(stream = nil)
+      if stream
+        instance_variable_get("@#{stream}_open")
+      else
+        @write_open && @read_open
+      end
     end
     
     # ios.pid => fixnum
@@ -545,23 +562,28 @@ module Redisk
     #    f = File.new("testfile")
     #    f.read(16)   #=> "This is line one"
     def read(length = nil, buffer = nil)
+      check_stream_open!(:read)
       if eof
         length ? nil : ""
-      else        
+      else
         if length 
           @read_buffer ||= ""
-          last_line = @read_buffer 
+          fetched = false
           while @read_buffer.length < length
-            last_line = gets
-            @read_buffer << last_line
+            @read_buffer << gets
+            fetched = true
           end
           result = @read_buffer[0...length]
           @read_buffer = @read_buffer[length..-1] || ""
-          @pos -= @read_buffer.length
+          if fetched
+            @pos -= @read_buffer.length 
+          else
+            @pos += result.length
+          end
         else
           result = readlines.join("")
         end
-        buffer ? buffer = result : result
+        buffer ? buffer.replace(buffer + result) : result
       end
     end
     
@@ -631,6 +653,7 @@ module Redisk
     #    f = File.new("testfile")
     #    f.readlines[0]   #=> "This is line one\n"
     def readlines
+      check_stream_open!(:read)
       self.class.readlines(name)
     end
     
@@ -867,7 +890,10 @@ module Redisk
     #    f.ungetc(c)                #=> nil
     #    f.getc                     #=> 84
     def ungetc(integer)
-      self << ("" << integer)
+      check_stream_open!(:write)
+      char = ("" << integer)
+      self << char
+      nil
     end
     
     # ios.write(string) => integer
@@ -882,6 +908,7 @@ module Redisk
     #    This is a test
     #    That was 15 bytes of data
     def write(string)
+      check_stream_open!(:write)
       string = string.to_s
       self << string
       flush
@@ -898,6 +925,11 @@ module Redisk
     # partial write.
     # 
     def write_nonblock(string)
+    end
+    
+    private
+    def check_stream_open!(stream = :read)
+      raise(IOError, "#{self} is not open for #{stream}ing") unless open?(stream)
     end
     
   end

@@ -43,3 +43,12 @@ module Redisk
   
 end
 
+class String
+  
+  if !method_defined?(:ord)
+    def ord
+      self[0]
+    end
+  end
+  
+end
