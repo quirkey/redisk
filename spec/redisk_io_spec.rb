@@ -36,6 +36,10 @@ describe Redisk::IO do
       @io.closed?.should == false
     end
     
+    it 'should add to the list of ios' do
+      Redisk::IO.all.should include(@io_name)
+    end
+    
   end
 
   describe 'foreach' do
@@ -439,26 +443,26 @@ describe Redisk::IO do
 
     describe '#seek' do
 
-      it 'should set the lineno to the absolute location' do
+      it 'should set the pos to the absolute location' do
         @io.seek(10)
-        @io.lineno.should == 10
+        @io.pos.should == 10
       end
 
-      it 'should set the lineno to the absolute location with SEEK_SET' do
+      it 'should set the pos to the absolute location with SEEK_SET' do
         @io.seek(15, IO::SEEK_SET)
-        @io.lineno.should == 15
+        @io.pos.should == 15
       end
 
-      it 'should set the lineno to the location relative to the end with SEEK_END' do
+      it 'should set the pos to the location relative to the end with SEEK_END' do
         @io.seek(-5, IO::SEEK_END)
-        @io.lineno.should == 95
+        @io.pos.should == @file_as_array.join.length - 5
       end
 
-      it 'should set the lineno to an offset position from the current line with SEEK_CUR' do
-        @io.lineno = 5
-        @io.lineno.should == 5
+      it 'should set the pos to an offset position from the current line with SEEK_CUR' do
+        @io.pos = 5
+        @io.pos.should == 5
         @io.seek(5, IO::SEEK_CUR)
-        @io.lineno.should == 10
+        @io.pos.should == 10
       end
 
     end

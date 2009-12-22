@@ -21,6 +21,8 @@ module Redisk
       @pos          = 0
       @lineno       = 0
       @size         = stat.size > 0 ? stat.size : true_size
+      # add io to the list of ios
+      redis.sadd "__ios__", name
       rewind
     end
     alias :for_fd :initialize
@@ -31,6 +33,10 @@ module Redisk
   
     def list_key
       self.class.list_key(name)
+    end
+    
+    def self.all
+      redis.smembers "__ios__"
     end
   
     # Executes the block for every line in the named I/O port, where lines are 
@@ -44,8 +50,9 @@ module Redisk
     #    GOT This is line three
     #    GOT And so on...
     def self.foreach(name, &block)
-      readlines(name).each(&block)
-      nil
+      io = new(name)
+      io.each_line(&block)
+      io.close
     end
   
     # With no associated block, open is a synonym for IO::new. If the optional 
@@ -103,9 +110,17 @@ module Redisk
       start_i = offset || 0
       end_i   = length ? start_i + (length - 1) : -1
       values  = redis.lrange(list_key(name), start_i, end_i)
-      values.join("")
+      values.join
     end
-  
+    
+    # Works similarly to IO.read, but operates on lines instead of bytes
+    def self.read_lines(name, length = nil, offset = nil)
+      start_i = offset || 0
+      end_i   = length ? start_i + (length - 1) : -1
+      values  = redis.lrange(list_key(name), start_i, end_i)
+      values.join
+    end
+      
     # Reads the entire file specified by name as individual lines, and returns 
     # those lines in an array. Lines are separated by sep_string.
     # 
@@ -409,7 +424,7 @@ module Redisk
     end
     
     def true_size
-      readlines.join('').length
+      readlines.join.length
     end
     
     # ios.lineno => integer
@@ -594,7 +609,7 @@ module Redisk
             @pos += result.length
           end
         else
-          result = readlines.join("")
+          result = readlines.join
         end
         buffer ? buffer.replace(buffer + result) : result
       end
@@ -800,6 +815,19 @@ module Redisk
     #    f.seek(-13, IO::SEEK_END)   #=> 0
     #    f.readline                  #=> "And so on...\n"
     def seek(offset, whence = SEEK_SET)
+      case whence
+      when SEEK_SET
+        self.pos = offset
+      when SEEK_END
+        self.pos = size + offset
+      when SEEK_CUR
+        self.pos += offset
+      end
+      0
+    end
+    
+    # works just like seek, but seeks by lineno instead of pos
+    def seek_lines(offset, whence = SEEK_SET)
       case whence
       when SEEK_SET
         self.lineno = offset
