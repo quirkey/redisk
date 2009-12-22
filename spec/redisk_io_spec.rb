@@ -534,6 +534,26 @@ describe Redisk::IO do
       end
       
     end
+    
+    describe '#unlink' do
+      before do
+        @io.unlink
+      end
+      
+      it 'should delete all keys associated with the io' do
+        Redisk.redis.get(@key).should == nil
+        Redisk::Stat.new(@key).size.should == 0
+      end
+      
+      it 'should close the stream' do
+        @io.closed?.should == true
+      end
+      
+      it 'should remove the key from the list of ios' do
+        Redisk::IO.all.should_not include(@io_name)
+      end
+      
+    end
 
   end
   

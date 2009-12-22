@@ -22,7 +22,7 @@ module Redisk
       @lineno       = 0
       @size         = stat.size > 0 ? stat.size : true_size
       # add io to the list of ios
-      redis.sadd "__ios__", name
+      redis.sadd dir, name
       rewind
     end
     alias :for_fd :initialize
@@ -36,9 +36,17 @@ module Redisk
     end
     
     def self.all
-      redis.smembers "__ios__"
+      redis.smembers dir
     end
   
+    def self.dir
+      "__ios__"
+    end
+    
+    def dir
+      self.class.dir
+    end
+    
     # Executes the block for every line in the named I/O port, where lines are 
     # separated by sep_string.
     # 
@@ -147,6 +155,15 @@ module Redisk
     #    IO.sysopen("testfile")   #=> 3
     def self.sysopen(name)
       raise NotImplementedError, ".sysopen is not implemented"
+    end
+  
+    # Removes all references to the io at name
+    def self.unlink(name)
+      redis.keys("#{name}:*").each do |key|
+        redis.del key.gsub('redisk:','')
+      end
+      redis.srem dir, name
+      nil
     end
   
     # String Output—Writes obj to ios. obj will be converted to a string using 
@@ -937,6 +954,12 @@ module Redisk
       char = ("" << integer)
       self << char
       nil
+    end
+    
+    # Removes all references to the IO and closes it for reading and writing
+    def unlink
+      close
+      self.class.unlink(name)
     end
     
     # ios.write(string) => integer
