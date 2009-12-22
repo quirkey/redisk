@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Redisk::IO do
   before do
+    FileUtils.mkdir_p('tmp')
     # load a file into an IO object
     @io_name = 'rails.log'
     @key = Redisk::IO.list_key(@io_name)
@@ -54,6 +55,45 @@ describe Redisk::IO do
       Redisk::IO.foreach(@io_name) {|l| l }.should == nil
     end
 
+  end
+
+  describe 'from_file' do
+    before(:each) do
+      Redisk::IO.unlink('dump_test.log')
+      File.open('tmp/dump_test.log', 'w+') {|f| f << "This is a file" } 
+    end
+    
+    it 'should write into io at name from file' do
+      @io = Redisk::IO.from_file('dump_test.log', 'tmp/dump_test.log')
+      @io.rewind
+      @io.gets.should == "This is a file"
+    end
+    
+    it 'should write into io at name from File' do
+      @io = Redisk::IO.from_file('dump_test.log', File.new('tmp/dump_test.log'))
+      @io.rewind
+      @io.gets.should == "This is a file"
+    end
+    
+  end
+  
+  describe 'to_file' do
+    before(:each) do
+      Redisk::IO.unlink('dump_test.log')
+      File.unlink('tmp/dump_test.log')
+      Redisk::IO.open('dump_test.log') {|io| io << 'This is an IO' }
+    end
+    
+    it 'should write into file from io' do
+      Redisk::IO.to_file('dump_test.log', 'tmp/dump_test.log')
+      File.read('tmp/dump_test.log').should == 'This is an IO'
+    end
+    
+    it 'should write into File from io' do
+      Redisk::IO.to_file('dump_test.log', File.open('tmp/dump_test.log', 'w'))
+      File.read('tmp/dump_test.log').should == 'This is an IO'
+    end
+    
   end
 
   describe 'open' do

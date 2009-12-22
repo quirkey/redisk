@@ -40,6 +40,8 @@ Theres also a nifty wrapper for that behavior:
 By default, Redisk uses the Redis on localhost:6379, but you can change that by setting
 
     Redisk.redis = 'myhost:myport'
+    
+Check out the small but growing list of examples in examples/
 
 == INSTALL (NOW!)
     

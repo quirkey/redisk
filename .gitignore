@@ -21,3 +21,4 @@ pkg
 ## PROJECT::SPECIFIC
 dump.rdb
 redis-test.pid
+tmp

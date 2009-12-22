@@ -165,7 +165,31 @@ module Redisk
       redis.srem dir, name
       nil
     end
-  
+
+    # Reads the contents of file into the IO. 
+    # If file is not a File its taken as a path and passed to File.open
+    def self.from_file(name, file)
+      file = File.open(file, 'r') if !file.is_a?(File)
+      io   = new(name)
+      file.each_line do |l|
+        io.write l
+      end
+      file.close
+      io
+    end
+    
+    # Writes the contents of IO into file.
+    # If file is not a File its taken as a path and passed to File.open
+    def self.to_file(name, file)
+      file = File.open(file, 'w') if !file.is_a?(File)
+      io   = new(name)
+      io.each_line do |l|
+        file.write l
+      end
+      file.close
+      io
+    end
+
     # String Output—Writes obj to ios. obj will be converted to a string using 
     # to_s.
     # 
