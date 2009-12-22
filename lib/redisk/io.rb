@@ -169,24 +169,16 @@ module Redisk
     # Reads the contents of file into the IO. 
     # If file is not a File its taken as a path and passed to File.open
     def self.from_file(name, file)
-      file = File.open(file, 'r') if !file.is_a?(File)
-      io   = new(name)
-      file.each_line do |l|
-        io.write l
-      end
-      file.close
+      io = new(name)
+      io.from_file(file)
       io
     end
     
     # Writes the contents of IO into file.
     # If file is not a File its taken as a path and passed to File.open
     def self.to_file(name, file)
-      file = File.open(file, 'w') if !file.is_a?(File)
       io   = new(name)
-      io.each_line do |l|
-        file.write l
-      end
-      file.close
+      io.to_file(file)
       io
     end
 
@@ -392,6 +384,30 @@ module Redisk
     # operating system actually writes it to disk.
     def fsync
       false
+    end
+    
+    # Reads the contents of file into the IO. 
+    # If file is not a File its taken as a path and passed to File.open
+    # Returns the IO
+    def from_file(file)
+      file = File.open(file, 'r') if !file.is_a?(File)
+      file.each_line do |l|
+        write l
+      end
+      file.close
+      self
+    end
+    
+    # Writes the contents of IO into file.
+    # If file is not a File its taken as a path and passed to File.open
+    # Returns the IO
+    def to_file(file)
+      file = File.open(file, 'w') if !file.is_a?(File)
+      each_line do |l|
+        file.write l
+      end
+      file.close
+      self
     end
     
     # ios.getc => fixnum or nil
