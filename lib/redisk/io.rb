@@ -107,10 +107,11 @@ module Redisk
     #    IO.read("testfile", 20)       #=> "This is line one\nThi"
     #    IO.read("testfile", 20, 10)   #=> "ne one\nThis is line "
     def self.read(name, length = nil, offset = nil)
-      start_i = offset || 0
-      end_i   = length ? start_i + (length - 1) : -1
-      values  = redis.lrange(list_key(name), start_i, end_i)
-      values.join
+      io = new(name)
+      io.seek(offset) if offset
+      returned = io.read(length)
+      io.close
+      returned
     end
     
     # Works similarly to IO.read, but operates on lines instead of bytes

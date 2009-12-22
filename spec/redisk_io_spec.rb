@@ -82,12 +82,29 @@ describe Redisk::IO do
       Redisk::IO.read(@io_name).should == @file_as_array.join("")
     end
 
-    it 'should return the first [length] contents' do
-      Redisk::IO.read(@io_name, 2).should == @file_as_array[0..1].join("")
+    it 'should return the first [length] bytes' do
+      Redisk::IO.read(@io_name, 2).should == @file_as_array[0][0..1]
     end
 
     it 'should return [length] contents starting at [offset]' do
-      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[2..3].join("")
+      Redisk::IO.read(@io_name, 2, 2).should == @file_as_array[0][2..3]
+    end
+
+  end
+  
+
+  describe 'read_lines' do
+
+    it 'should return the entire contents without arguments' do
+      Redisk::IO.read_lines(@io_name).should == @file_as_array.join("")
+    end
+
+    it 'should return the first [length] contents' do
+      Redisk::IO.read_lines(@io_name, 2).should == @file_as_array[0..1].join("")
+    end
+
+    it 'should return [length] contents starting at [offset]' do
+      Redisk::IO.read_lines(@io_name, 2, 2).should == @file_as_array[2..3].join("")
     end
 
   end
@@ -314,7 +331,7 @@ describe Redisk::IO do
 
       it 'should append arguments into a string and write to io' do
         @io.print('My ', 'name ', 'is ', 'redisk')
-        line = Redisk::IO.read(@io_name, 1, 100)
+        line = Redisk::IO.read_lines(@io_name, 1, 100)
         line.should == 'My name is redisk'
       end
 
@@ -325,7 +342,7 @@ describe Redisk::IO do
       it 'should write the contents of $_ if no arguments are provided' do
         @io.gets
         @io.print
-        line = Redisk::IO.read(@io_name, 1, 100)
+        line = Redisk::IO.read_lines(@io_name, 1, 100)
         line.should == @file_as_array[0]
       end
     end
@@ -334,7 +351,7 @@ describe Redisk::IO do
 
       it 'should run the arguments through sprintf and print to the io' do
         @io.printf('My name is %s', 'redisk')
-        line = Redisk::IO.read(@io_name, 1, 100)
+        line = Redisk::IO.read_lines(@io_name, 1, 100)
         line.should == 'My name is redisk'
       end
 
