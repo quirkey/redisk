@@ -961,6 +961,7 @@ module Redisk
       close
       self.class.unlink(name)
     end
+    alias :delete :unlink
     
     # ios.write(string) => integer
     # Writes the given string to ios. The stream must be opened for writing. 
