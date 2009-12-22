@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{redisk}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2009-12-17}
+  s.date = %q{2009-12-22}
   s.description = %q{Redisk includes Redisk::IO which is ~ Ruby's stdlib IO. It can be used with stdlib's Logger to log directly to redis}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
@@ -19,9 +19,12 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
      ".gitignore",
+     "HISTORY",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
+     "examples/rails.rb",
+     "examples/yajl.rb",
      "lib/redisk.rb",
      "lib/redisk/helper.rb",
      "lib/redisk/io.rb",
@@ -45,7 +48,9 @@ Gem::Specification.new do |s|
     "spec/redisk_io_spec.rb",
      "spec/redisk_logger_spec.rb",
      "spec/redisk_stat_spec.rb",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "examples/rails.rb",
+     "examples/yajl.rb"
   ]
 
   if s.respond_to? :specification_version then

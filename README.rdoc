@@ -45,6 +45,8 @@ Check out the small but growing list of examples in examples/
 
 == INSTALL (NOW!)
     
+Proudly tested and working on Ruby 1.8.6, 1.8.7, and 1.9.1 
+    
 Gems are on gemcutter:
 
     gem install redisk
