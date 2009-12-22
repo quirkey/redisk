@@ -20,7 +20,7 @@ module Redisk
       @sync         = false
       @pos          = 0
       @lineno       = 0
-      @size         = readlines.join('').length
+      @size         = stat.size > 0 ? stat.size : true_size
       rewind
     end
     alias :for_fd :initialize
@@ -54,7 +54,9 @@ module Redisk
     # instance, IO::open returns the value of the block.
     def self.open(name, mode = 'r')
       io = new(name, mode)
-      block_given? ? yield(io) : io
+      returned = block_given? ? yield(io) : io
+      io.close
+      returned
     end
   
     # IO.pipe → array
@@ -343,7 +345,7 @@ module Redisk
     #    f.getc   #=> 84
     #    f.getc   #=> 104
     def getc
-      read(1).ord
+      read(1).to_s.ord
     end
     
     # ios.gets(sep_string=$/) => string or nil
@@ -360,6 +362,7 @@ module Redisk
     def gets
       check_stream_open!(:read)
       flush
+      return nil if eof?
       val = redis.lrange(list_key, lineno, lineno + 1)
       if val = val.first
         self.lineno += 1
@@ -403,6 +406,10 @@ module Redisk
     # the estimated size in bytes of the current file
     def size
       @size
+    end
+    
+    def true_size
+      readlines.join('').length
     end
     
     # ios.lineno => integer
@@ -483,7 +490,13 @@ module Redisk
     #    f.pos = 17
     #    f.gets   #=> "This is line two\n"
     def pos=(num)
-      @pos = num.to_i
+      current_pos = @pos
+      if num < current_pos
+        @pos = 0
+      else
+        num -= current_pos
+      end
+      read(num)
     end
       
     # ios.print() => nil
@@ -569,8 +582,8 @@ module Redisk
         if length 
           @read_buffer ||= ""
           fetched = false
-          while @read_buffer.length < length
-            @read_buffer << gets
+          while @read_buffer.length < length && !eof?
+            @read_buffer << gets.to_s
             fetched = true
           end
           result = @read_buffer[0...length]
@@ -875,6 +888,7 @@ module Redisk
       else
         redis.ltrim list_key, -size, -1
       end
+      stat.write_attribute(:size, @size = true_size)
       length
     end
     

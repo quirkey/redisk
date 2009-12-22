@@ -14,7 +14,9 @@ describe Redisk::IO do
   end
 
   after do
-    Redisk.redis.del @key
+    Redisk.redis.keys(@key.gsub(':_list', '*')).each do |key|
+      Redisk.redis.del key.gsub('redisk:', '')
+    end
   end
 
   describe 'new' do    
@@ -294,12 +296,12 @@ describe Redisk::IO do
       it 'should set the pos' do
         @io.pos = 5
         @io.pos.should == 5
-        @io.getc.should == @file_as_array[0].ord
+        @io.getc.should == @file_as_array[0][5].ord
       end
       
       it 'should set the lineno based on the pos' do
         @io.pos = @file_as_array[0].length + 2
-        @io.lineno.should == 1
+        @io.lineno.should == 2
       end
       
     end
@@ -467,7 +469,7 @@ describe Redisk::IO do
         @stat = @io.stat
         @stat.should be_instance_of(Redisk::Stat)
         @stat.atime.should be_instance_of(Time)
-        @stat.size.should == @file_as_array.join('').length
+        @stat.size.should be_instance_of(Fixnum)
       end
 
     end
