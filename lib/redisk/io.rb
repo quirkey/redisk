@@ -136,7 +136,7 @@ module Redisk
     #    a = IO.readlines("testfile")
     #    a[0]   #=> "This is line one\n"
     def self.readlines(name)
-      redis.lrange list_key(name), 0, -1
+      redis.lrange(list_key(name), 0, -1) || []
     end
   
     # IO.select(read_array 
