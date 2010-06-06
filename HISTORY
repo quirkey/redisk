@@ -1,3 +1,7 @@
+=== 0.2.1 [2009-06-03]
+
+* Fixed compatibility with redis.rb >= 2.0 
+
 === 0.2.0 [2009-12-22]
 
 * Almost complete support for both line and byte operations on Redisk::IO
