@@ -18,7 +18,7 @@ module Redisk
       host, port = server.split(':')
       redis = Redis.new(:host => host, :port => port, :thread_safe => true)
       @redis = Redis::Namespace.new(:redisk, :redis => redis)
-    when Redis
+    when Redis, Redis::Namespace
       @redis = Redis::Namespace.new(:redisk, :redis => server)
     else
       raise "I don't know what to do with #{server.inspect}"
