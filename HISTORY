@@ -1,3 +1,7 @@
+=== 0.2.2 [2009-08-15]
+
+* Fixed issue with accepting Redis::Namespaces as redis= [Ivan Samsonov]
+
 === 0.2.1 [2009-06-03]
 
 * Fixed compatibility with redis.rb >= 2.0 

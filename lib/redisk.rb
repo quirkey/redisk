@@ -6,7 +6,7 @@ require 'redisk/io'
 require 'redisk/logger'
 
 module Redisk
-  VERSION = '0.2.1'
+  VERSION = '0.2.2'
   
   extend self
   
@@ -18,7 +18,9 @@ module Redisk
       host, port = server.split(':')
       redis = Redis.new(:host => host, :port => port, :thread_safe => true)
       @redis = Redis::Namespace.new(:redisk, :redis => redis)
-    when Redis, Redis::Namespace
+    when Redis::Namespace
+      @redis = server
+    when Redis
       @redis = Redis::Namespace.new(:redisk, :redis => server)
     else
       raise "I don't know what to do with #{server.inspect}"
