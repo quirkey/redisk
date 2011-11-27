@@ -20,10 +20,8 @@ module Redisk
       @redis = Redis::Namespace.new(:redisk, :redis => redis)
     when Redis::Namespace
       @redis = server
-    when Redis
-      @redis = Redis::Namespace.new(:redisk, :redis => server)
     else
-      raise "I don't know what to do with #{server.inspect}"
+      @redis = Redis::Namespace.new(:redisk, :redis => server)
     end
   end
 
